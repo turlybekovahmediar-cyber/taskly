@@ -1,0 +1,18 @@
+# Render Blueprint: New → Blueprint → выбрать этот репозиторий.
+# Один веб-сервис отдаёт и API, и собранный фронтенд. База — Neon (строку подключения вписать вручную).
+services:
+  - type: web
+    name: taskly
+    runtime: node
+    region: ohio            # ближе всего к базе Neon в us-east-2
+    plan: free
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false         # Render спросит значение при создании
+      - key: JWT_SECRET
+        generateValue: true

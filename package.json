@@ -1,0 +1,12 @@
+{
+  "name": "taskly",
+  "private": true,
+  "description": "Taskly — биржа задач для малого бизнеса и начинающих специалистов",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "npm ci --include=dev --prefix frontend && npm run build --prefix frontend && npm ci --prefix backend",
+    "start": "npm start --prefix backend",
+    "dev:api": "npm run dev --prefix backend",
+    "dev:web": "npm run dev --prefix frontend"
+  }
+}
