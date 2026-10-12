@@ -1,5 +1,4 @@
 @echo off
-rem Taskly: build the site and start the server (API + site) on http://localhost:3000
 cd /d "%~dp0"
 
 where node >nul 2>nul

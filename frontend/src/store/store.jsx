@@ -1,7 +1,3 @@
-/* Taskly — состояние приложения.
-   Данные приходят с сервера (GET /api/state) — ровно то, что текущему пользователю можно видеть.
-   Каждое действие — запрос к API; сервер проверяет права и статус и возвращает обновлённые данные.
-   В браузере хранятся только настройки вида (акцент, плотность, «пустой аккаунт»). */
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { OPEN_STATUSES } from '../data/mock.js';
 import { initials } from '../lib/format.js';
@@ -17,15 +13,13 @@ function loadUi() {
   try {
     const raw = JSON.parse(localStorage.getItem(UI_KEY));
     if (raw && raw.tweaks) return { emptyMode: !!raw.emptyMode, tweaks: { ...DEFAULT_TWEAKS, ...raw.tweaks } };
-  } catch (e) { /* повреждённое хранилище — настройки по умолчанию */ }
+  } catch (e) {}
   return { emptyMode: false, tweaks: DEFAULT_TWEAKS };
 }
 
 let seq = 0;
 const uid = (p) => p + '-' + (++seq).toString(36);
 
-/* ---------------- Селекторы (чистые функции от entities) ---------------- */
-/* Справочник специалистов приходит с сервера; провайдер обновляет его перед рендером страниц */
 let specIndex = new Map();
 export const specialistById = (id) => specIndex.get(id) || null;
 export const projectById = (e, id) => e.projects.find((p) => p.id === id) || null;
@@ -37,7 +31,6 @@ export const changesOf = (e, projectId) => e.changeRequests.filter((c) => c.proj
 export const matchSkills = (spec, p) => (spec ? spec.skills.filter((s) => p.skills.includes(s)) : []);
 export const isOpen = (p) => OPEN_STATUSES.includes(p.status);
 
-/* Профиль-заглушка, пока у аккаунта нет профиля специалиста (или для гостя) */
 const blankSpecialist = (user) => ({
   id: user?.id || 'guest', name: user?.name || 'Гость', initials: initials(user?.name || 'Гость'), avatar: 'avatar--a', handle: '', email: user?.email,
   headline: '', level: 'new', levelName: 'Новый специалист', about: '', directions: [], skills: [], city: '', availability: '', responseTime: '',
@@ -48,14 +41,14 @@ const AppCtx = createContext(null);
 export const useApp = () => useContext(AppCtx);
 
 export function AppProvider({ children }) {
-  const [data, setData] = useState(null);     // снимок с сервера: user, specialists, savedProjects, entities
-  const [draft, setDraft] = useState(null);   // черновик мастера — локально сразу, на сервер с задержкой
+  const [data, setData] = useState(null);
+  const [draft, setDraft] = useState(null);
   const [ui, setUi] = useState(loadUi);
   const [pending, setPending] = useState(false);
   const [toasts, setToasts] = useState([]);
   const route = useRoute();
 
-  useEffect(() => { try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch (e) { /* приватный режим */ } }, [ui]);
+  useEffect(() => { try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch (e) {} }, [ui]);
 
   const toast = useCallback((msg, kind) => {
     const id = uid('t');
@@ -63,7 +56,6 @@ export function AppProvider({ children }) {
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 3600);
   }, []);
 
-  /* Ответы применяются по порядку отправки: старый фоновый опрос не затирает результат свежего действия */
   const sent = useRef(0);
   const applied = useRef(0);
   const dataRef = useRef(data);
@@ -82,7 +74,6 @@ export function AppProvider({ children }) {
 
   const refresh = useCallback((opts) => request('GET', '/state', undefined, opts).catch(() => null), [request]);
 
-  /* Действие пользователя: при ошибке — сообщение, результат null */
   const call = useCallback(async (method, path, body, opts) => {
     try { return await request(method, path, body, opts); }
     catch (e) {
@@ -92,14 +83,12 @@ export function AppProvider({ children }) {
     }
   }, [request, refresh, toast]);
 
-  /* Первая загрузка */
   useEffect(() => {
     request('GET', '/state', undefined, { withDraft: true }).catch((e) => {
       setData({ user: null, specialists: [], savedProjects: [], entities: EMPTY_ENTITIES, offline: e.message });
     });
   }, [request]);
 
-  /* Фоновое обновление: новые отклики, сообщения и уведомления от второй стороны */
   const loggedIn = !!data?.user;
   useEffect(() => {
     if (!loggedIn) return undefined;
@@ -109,7 +98,6 @@ export function AppProvider({ children }) {
     return () => { clearInterval(t); window.removeEventListener('focus', tick); };
   }, [loggedIn, refresh]);
 
-  /* Черновик уходит на сервер через секунду после последней правки */
   const draftTimer = useRef(null);
   const draftRef = useRef(draft);
   draftRef.current = draft;
@@ -123,23 +111,18 @@ export function AppProvider({ children }) {
     const projectOfProposal = (id) => dataRef.current?.entities.proposals.find((x) => x.id === id)?.projectId;
 
     return {
-      /* ---- вход и роли ---- */
-      /* role: client | specialist | guest. Гость → вход в демо-аккаунт; guest → выход; иначе — переключение кабинета */
       setRole: (role) => auth(async () => {
         const u = user();
         if (role === 'guest') { if (u) await call('POST', '/auth/logout', undefined, { withDraft: true }); return; }
         if (!u) { await call('POST', '/auth/demo', { role }, { withDraft: true }); return; }
         if (u.role !== role) await call('PATCH', '/auth/me', { role }, { withDraft: true });
       }),
-      /* Ошибки входа и регистрации показывает форма, поэтому здесь они пробрасываются */
       login: (body) => auth(() => request('POST', '/auth/login', body, { withDraft: true })),
       register: (body) => auth(() => request('POST', '/auth/register', body, { withDraft: true })),
 
-      /* ---- настройки вида (только в этом браузере) ---- */
       setEmptyMode: (emptyMode) => setUi((s) => ({ ...s, emptyMode })),
       setTweaks: (patch) => setUi((s) => ({ ...s, tweaks: { ...s.tweaks, ...patch } })),
 
-      /* ---- профиль ---- */
       setBizName: (company) => call('PATCH', '/me/business', { company }),
       updateBusiness: (patch) => call('PATCH', '/me/business', patch),
       updateSpecProfile: (patch) => call('PATCH', '/me/specialist', patch),
@@ -150,13 +133,11 @@ export function AppProvider({ children }) {
       },
       resetDemo: () => call('POST', '/demo/reset'),
 
-      /* ---- черновик и публикация проекта ---- */
       saveDraft: (d) => {
         setDraft(d);
         clearTimeout(draftTimer.current);
         if (user()) draftTimer.current = setTimeout(() => api('PUT', '/me/draft', d || {}).catch(() => {}), 1000);
       },
-      /* Возвращает id нового проекта или null */
       publishProject: async () => {
         clearTimeout(draftTimer.current);
         const res = await call('POST', '/projects', draftRef.current);
@@ -164,7 +145,6 @@ export function AppProvider({ children }) {
         return res?.id || null;
       },
 
-      /* ---- отклики ---- */
       markProposalsRead: (projectId) => request('POST', '/projects/' + projectId + '/proposals/read').catch(() => null),
       applyToProject: (projectId, body) => call('POST', '/projects/' + projectId + '/proposals', body),
       withdrawProposal: (id) => call('POST', '/proposals/' + id + '/withdraw'),
@@ -172,7 +152,6 @@ export function AppProvider({ children }) {
       confirmInvite: (id) => call('POST', '/proposals/' + id + '/confirm'),
       inviteSpecialist: (projectId, specialistId, message) => call('POST', '/projects/' + projectId + '/invite', { specialistId, message }),
 
-      /* ---- сделка ---- */
       selectProposal: (proposalId) => call('POST', '/projects/' + projectOfProposal(proposalId) + '/select', { proposalId }),
       reservePayment: (projectId) => call('POST', '/projects/' + projectId + '/payment'),
       completeStage: (projectId) => call('POST', '/projects/' + projectId + '/stages/complete'),
@@ -182,12 +161,10 @@ export function AppProvider({ children }) {
       leaveReview: (projectId, from, { stars, tags, text }) => call('POST', '/projects/' + projectId + '/reviews', { stars, tags, text }),
       sendMessage: (projectId, from, text, file) => call('POST', '/projects/' + projectId + '/messages', { text, file }),
 
-      /* ---- изменения задачи ---- */
       proposeChange: (projectId, from, { title, what, note, priceTo, daysTo }) =>
         call('POST', '/projects/' + projectId + '/changes', { title, what, note, priceTo, daysTo }),
       decideChange: (crId, approve) => call('POST', '/changes/' + crId + '/' + (approve ? 'approve' : 'reject')),
 
-      /* ---- уведомления ---- */
       readNotification: (id) => call('POST', '/notifications/' + id + '/read'),
       readAllNotifications: (role) => call('POST', '/notifications/read-all', { role }),
     };

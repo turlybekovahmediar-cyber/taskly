@@ -1,4 +1,3 @@
-/* Taskly — кабинет специалиста: обзор, поиск проектов, проект, отклик, отклики, выплаты, отзывы, профиль. */
 import React, { useState } from 'react';
 import { Icon, useApp, Btn, Link, Field, Tag, Badge, StatusPill, Avatar, Modal, Empty, Ph, Money, FeeCalc, PayoutRows, SafeNote, Rail, Metric, Tabs, Stars, Dropdown, useSoon, commission } from '../components/ui.jsx';
 import { AppShell, SideNav } from '../components/shell.jsx';
@@ -21,7 +20,6 @@ const SPEC_NAV = [
   { to: '/settings', label: 'Настройки', icon: 'settings' },
 ];
 
-/* Боковое меню кабинета — только у специалиста; гость и бизнес видят каталог без него */
 function SpecShell({ title, sub, crumbs, actions, children }) {
   const app = useApp();
   return (
@@ -32,7 +30,6 @@ function SpecShell({ title, sub, crumbs, actions, children }) {
   );
 }
 
-/* Данные демо-специалиста */
 function useSpecData() {
   const app = useApp();
   const me = app.me;
@@ -43,7 +40,6 @@ function useSpecData() {
   return { me, myProposals, myProjects, active: myProjects.filter((p) => p.status !== 'done'), done: myProjects.filter((p) => p.status === 'done') };
 }
 
-/* Активный (не отозванный) отклик специалиста на проект */
 const myProposalFor = (e, meId, projectId) => e.proposals.find((x) => x.projectId === projectId && x.specialistId === meId && x.status !== 'withdrawn');
 
 const PROPOSAL_STATUS = {
@@ -56,7 +52,6 @@ function ProposalStatus({ status }) {
   return <Badge tone={tone}>{label}</Badge>;
 }
 
-/* ============================ Обзор ============================ */
 function SpecDashboard() {
   const app = useApp();
   const { me, myProposals, active, done } = useSpecData();
@@ -176,7 +171,6 @@ function SpecDashboard() {
   );
 }
 
-/* -------------------- Карточка проекта (каталог) -------------------- */
 function ProjectCardSpec({ p }) {
   const app = useApp();
   const isSpec = app.role === 'specialist';
@@ -221,7 +215,6 @@ function ProjectCardSpec({ p }) {
   );
 }
 
-/* ============================ Найти проекты ============================ */
 const PAGE = 6;
 const TIME_FILTERS = { fast: (d) => d <= 7, mid: (d) => d > 7 && d <= 14, long: (d) => d > 14 };
 
@@ -380,7 +373,6 @@ function SpecProjects() {
   );
 }
 
-/* ============================ Детальная страница проекта ============================ */
 function SpecProjectDetail({ id }) {
   const app = useApp();
   const p = app.entities.projects.find((x) => x.id === id);
@@ -547,7 +539,6 @@ function SpecProjectDetail({ id }) {
   );
 }
 
-/* ============================ Отклик на проект ============================ */
 const DAY_OPTIONS = [3, 5, 7, 10, 14, 21, 30];
 
 function SpecApply({ id }) {
@@ -730,7 +721,6 @@ function SpecApply({ id }) {
   );
 }
 
-/* ============================ Мои отклики ============================ */
 function SpecProposals() {
   const app = useApp();
   const [tab, setTab] = useState('all');
@@ -825,7 +815,6 @@ function SpecProposals() {
   );
 }
 
-/* ============================ Сообщения (специалист) ============================ */
 function SpecMessages() {
   const { myProjects } = useSpecData();
   return (
@@ -835,7 +824,6 @@ function SpecMessages() {
   );
 }
 
-/* ============================ Выплаты ============================ */
 function usePayoutRows() {
   const app = useApp();
   const { me, myProjects } = useSpecData();
@@ -918,7 +906,6 @@ function SpecPayout() {
   );
 }
 
-/* ============================ Отзывы специалиста ============================ */
 function SpecReviews() {
   const app = useApp();
   const me = app.me;
@@ -982,7 +969,6 @@ function SpecReviews() {
   );
 }
 
-/* ============================ История проектов (специалист) ============================ */
 function SpecHistory() {
   const app = useApp();
   const { me, done } = useSpecData();
@@ -1030,7 +1016,6 @@ function SpecHistory() {
   );
 }
 
-/* ============================ Профиль специалиста (свой) ============================ */
 function SpecProfile() {
   const app = useApp();
   const soon = useSoon();
@@ -1124,7 +1109,6 @@ function SpecProfile() {
   );
 }
 
-/* ============================ Редактирование профиля ============================ */
 const AVAILABILITY = ['Свободна', 'Свободен', 'Свободна с 30 сентября', 'Свободен с 1 октября', 'Беру 2 проекта в месяц'];
 
 function SpecProfileEdit() {

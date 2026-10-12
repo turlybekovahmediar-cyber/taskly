@@ -1,5 +1,3 @@
-/* Taskly — рабочее пространство проекта (единое для обеих сторон, отличается набор действий).
-   Разделы: Обзор · ТЗ · Этапы · Файлы · Сообщения · Изменения · Поддержка. */
 import React, { useState } from 'react';
 import { Icon, useApp, Btn, Link, Field, Tag, Badge, StatusPill, Avatar, Modal, Empty, Money, PayoutRows, SafeNote, Rail, Metric, Tabs, Stars, Dropdown, useSoon, commission } from '../components/ui.jsx';
 import { AppShell } from '../components/shell.jsx';
@@ -129,7 +127,6 @@ function Workspace({ id, section = 'overview' }) {
   );
 }
 
-/* ------------------------------- Обзор ------------------------------- */
 function statusText(p, role) {
   const stageName = p.stages[Math.min(p.stage, p.stages.length - 1)];
   switch (p.status) {
@@ -295,7 +292,6 @@ const ChangeBadge = ({ c }) => (
       : <Badge tone="warn">Ожидает решения</Badge>
 );
 
-/* --------------------------------- ТЗ --------------------------------- */
 function WsTz({ p, role, open }) {
   const app = useApp();
   const { other } = useParties(p);
@@ -363,13 +359,11 @@ function WsTz({ p, role, open }) {
   );
 }
 
-/* ------------------------------- Этапы ------------------------------- */
 const stageHint = (i, n) => (i === 0 ? 'согласование и материалы' : i === n - 1 ? 'финальные файлы и передача' : i === n - 2 ? 'проверка заказчиком' : 'основная работа по ТЗ');
 
 function WsStages({ p, role }) {
   const app = useApp();
   const n = p.stages.length;
-  /* Последние два этапа (проверка и результат) закрываются сдачей и приёмкой, а не кнопкой */
   const manualLimit = Math.max(n - 2, 0);
   return (
     <div className="shell-ws">
@@ -434,7 +428,6 @@ function WsStages({ p, role }) {
   );
 }
 
-/* ------------------------------- Файлы ------------------------------- */
 const FILE_GROUPS = { pdf: 'Документы', doc: 'Документы', txt: 'Документы', xls: 'Таблицы', fig: 'Исходники', zip: 'Архивы', png: 'Изображения' };
 
 function FileRow({ f, compact, waitCheck }) {
@@ -503,7 +496,6 @@ function WsFiles({ p, role }) {
   );
 }
 
-/* ------------------------------ Сообщения ------------------------------ */
 function WsMessages({ p, base, open }) {
   const app = useApp();
   const { other, otherRole } = useParties(p);
@@ -538,7 +530,6 @@ function WsMessages({ p, base, open }) {
   );
 }
 
-/* ------------------------------ Изменения ------------------------------ */
 function WsChanges({ p, role, open }) {
   const app = useApp();
   const list = changesOf(app.entities, p.id);
@@ -649,7 +640,6 @@ function WsChanges({ p, role, open }) {
   );
 }
 
-/* ------------------------------ Поддержка ------------------------------ */
 function WsSupport({ role, open }) {
   return (
     <div className="shell-ws">
@@ -697,7 +687,6 @@ function WsSupport({ role, open }) {
   );
 }
 
-/* ============================== Модальные окна ============================== */
 function DeliverModal({ p, onClose }) {
   const app = useApp();
   const [stage, setStage] = useState('form');

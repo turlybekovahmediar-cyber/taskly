@@ -1,5 +1,3 @@
-/* Применяет схему (schema.sql) и, если база пустая, загружает демо-данные.
-   Запускается автоматически при старте сервера и вручную: npm run migrate */
 import { readFile } from 'node:fs/promises';
 import { pool, tx } from './db.js';
 import { isMain } from './isMain.js';

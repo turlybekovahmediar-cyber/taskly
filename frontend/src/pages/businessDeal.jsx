@@ -1,4 +1,3 @@
-/* Taskly — бизнес: отклики, профиль специалиста, выбор исполнителя, резерв оплаты, история, профиль компании, сообщения. */
 import React, { useState, useEffect } from 'react';
 import { Icon, useApp, Btn, Link, Field, Tag, Badge, Avatar, Modal, Empty, Ph, Money, SafeNote, Metric, Tabs, Stars, Dropdown, commission } from '../components/ui.jsx';
 import { AppShell } from '../components/shell.jsx';
@@ -11,14 +10,12 @@ import { money, plural, pluralN, W, daysLabel, editsLabel, ratingLabel, initials
 
 const levelTone = (s) => (s.level === 'new' ? undefined : s.level === 'verified' ? 'info' : 'ok');
 
-/* ============================ Отклики ============================ */
 function BizProposals({ id }) {
   const app = useApp();
   const p = app.entities.projects.find((x) => x.id === id && x.mine);
   const [tab, setTab] = useState('all');
   const [sort, setSort] = useState('match');
   const [chosen, setChosen] = useState(null);
-  /* «Новые» запоминаем при открытии, а в данных сразу отмечаем прочитанными */
   const [unreadIds] = useState(() => (p ? proposalsOf(app.entities, p.id).filter((x) => !x.read).map((x) => x.id) : []));
   useEffect(() => { if (p) app.markProposalsRead(p.id); }, [id]);
 
@@ -168,12 +165,10 @@ function ProposalCard({ pr, isNew, onSelect }) {
   );
 }
 
-/* ============================ Профиль специалиста (взгляд бизнеса) ============================ */
 function BizSpecialistProfile({ id }) {
   const app = useApp();
   const s = specialistById(id);
   const [invite, setInvite] = useState(() => parseRoute(app.route).params.get('invite') === '1');
-  /* Отзывы с платформы + история до Taskly */
   const allReviews = s ? [
     ...app.entities.reviews.filter((r) => r.to === s.id && r.from === 'client').map((r) => {
       const p = app.entities.projects.find((x) => x.id === r.projectId);
@@ -341,7 +336,6 @@ function InviteModal({ s, onClose }) {
   );
 }
 
-/* ============================ Поиск специалистов ============================ */
 const responseHours = (s) => { const m = s.responseTime.match(/за\s*(\d+)?\s*час/); return m ? Number(m[1] || 1) : 24; };
 const isFreeNow = (s) => /^свобод/i.test(s.availability) && !/\sс\s/.test(s.availability);
 
@@ -462,7 +456,6 @@ function SpecialistCard({ s }) {
   );
 }
 
-/* ============================ Выбор исполнителя: подтверждение условий ============================ */
 function BizSelectStep({ id, proposalId }) {
   const app = useApp();
   const p = app.entities.projects.find((x) => x.id === id && x.mine);
@@ -581,7 +574,7 @@ function BizSelectStep({ id, proposalId }) {
 
 function PayModal({ p, onClose }) {
   const app = useApp();
-  const [stage, setStage] = useState('form'); // form | processing | done
+  const [stage, setStage] = useState('form');
   const [method, setMethod] = useState('card');
   const [understood, setUnderstood] = useState(true);
   const price = priceOf(p);
@@ -646,7 +639,6 @@ function PayModal({ p, onClose }) {
   );
 }
 
-/* ============================ История проектов ============================ */
 function BizHistory() {
   const app = useApp();
   const list = app.emptyMode ? [] : app.entities.projects.filter((p) => p.mine && p.status === 'done');
@@ -705,7 +697,6 @@ function BizHistory() {
   );
 }
 
-/* ============================ Профиль компании ============================ */
 function BizProfile() {
   const app = useApp();
   const [name, setName] = useState(app.bizName);
@@ -778,7 +769,6 @@ function BizProfile() {
   );
 }
 
-/* ============================ Сообщения (бизнес) ============================ */
 function BizMessages() {
   const app = useApp();
   const projects = app.emptyMode ? [] : app.entities.projects.filter((p) => p.mine && p.specialistId);

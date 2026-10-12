@@ -1,11 +1,9 @@
-/* Taskly — UI-примитивы. Всё, что повторяется на страницах, живёт здесь. */
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../store/store.jsx';
 import { statuses } from '../data/mock.js';
 import { commission, money } from '../lib/format.js';
 import { navigate } from '../lib/router.js';
 
-/* ============================ Icons ============================ */
 const PATHS = {
   search: 'M10.5 4a6.5 6.5 0 1 0 4.6 11.1l3.4 3.4M10.5 4a6.5 6.5 0 0 1 0 13',
   arrowR: 'M4 10h12M11 5l5 5-5 5',
@@ -64,7 +62,6 @@ function Icon({ name, size = 20, className = '', style }) {
   );
 }
 
-/* ============================ Primitives ============================ */
 function Btn({ variant = 'secondary', size, full, icon, iconRight, children, className = '', type = 'button', ...rest }) {
   const cls = ['btn', `btn--${variant}`, size ? `btn--${size}` : '', full ? 'btn--full' : '', className].filter(Boolean).join(' ');
   return (
@@ -76,7 +73,6 @@ function Btn({ variant = 'secondary', size, full, icon, iconRight, children, cla
   );
 }
 
-/* Ссылка с настоящим href: открывается в новой вкладке по Ctrl/Cmd-клику. */
 function Link({ to, children, className = '', style, onClick, ...rest }) {
   return (
     <a href={to} className={className} style={style} {...rest}
@@ -116,7 +112,6 @@ function Avatar({ person, size, round, className = '' }) {
   return <div className={cls} aria-hidden="true">{person.initials}</div>;
 }
 
-/* Модальное окно: фокус внутрь, Esc закрывает, Tab не уходит за пределы, фон не прокручивается. */
 function Modal({ title, sub, onClose, children, footer, wide }) {
   const ref = useRef(null);
   const closeRef = useRef(onClose);
@@ -229,7 +224,6 @@ function Money({ value, strong }) {
   return <span className="num" style={{ fontWeight: strong ? 600 : undefined }}>{money(value)}</span>;
 }
 
-/* Расчёт комиссии — везде через commission() */
 function FeeCalc({ price, compact, note = true }) {
   const c = commission(price);
   return (
@@ -244,7 +238,6 @@ function FeeCalc({ price, compact, note = true }) {
   );
 }
 
-/* Строки «стоимость → комиссия → получит» для панелей условий */
 function PayoutRows({ price, label = 'Вы получите', priceLabel = 'Стоимость проекта' }) {
   const c = commission(price);
   return (
@@ -262,7 +255,6 @@ function Rail({ stage, total }) {
   ))}</div>;
 }
 
-/* paid=false — оплата ещё не зарезервирована, честно об этом говорим */
 function SafeNote({ amount, compact, paid = true }) {
   if (!paid) {
     return (
@@ -311,7 +303,6 @@ function Dropdown({ label, children, align = 'right', variant = 'secondary', ico
   );
 }
 
-/* Для функций, которые появятся вместе с бэкендом (загрузка файлов, PDF и т. п.) */
 function useSoon() {
   const app = useApp();
   return (what) => app.toast((what ? what + ': ' : '') + 'появится после подключения сервера');

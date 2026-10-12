@@ -1,5 +1,3 @@
-/* Регистрация, вход, выход, переключение роли.
-   POST /api/auth/register · POST /api/auth/login · POST /api/auth/demo · POST /api/auth/logout · PATCH /api/auth/me · GET /api/state */
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
 import rateLimit from 'express-rate-limit';
@@ -22,13 +20,11 @@ const RegisterBody = z.object({
 });
 const LoginBody = z.object({ email, password: z.string().min(1, 'Введите пароль').max(128), role: role.optional() });
 
-/* Не больше 20 попыток входа за 15 минут с одного адреса */
 const loginLimit = rateLimit({
   windowMs: 15 * 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false,
   message: { error: 'Слишком много попыток входа. Попробуйте через 15 минут.' },
 });
 
-/* У аккаунта есть профиль для каждой роли, которой он пользовался. Профиль создаётся при первом переключении. */
 export async function switchRole(db, userId, nextRole) {
   if (nextRole === 'client') {
     await db.query(`INSERT INTO business_profiles (user_id, company) SELECT id, name FROM users WHERE id = $1 ON CONFLICT DO NOTHING`, [userId]);
@@ -66,7 +62,6 @@ router.post('/auth/login', loginLimit, h(async (req, res) => {
   await sendState(res, rows[0].id);
 }));
 
-/* Быстрый вход в демо-аккаунты для показа продукта */
 router.post('/auth/demo', h(async (req, res) => {
   const r = parse(z.object({ role }), req.body).role;
   const id = DEMO_ACCOUNTS[r].id;
@@ -78,7 +73,6 @@ router.post('/auth/demo', h(async (req, res) => {
 
 router.post('/auth/logout', (req, res) => { clearSession(res); sendState(res, null).catch(() => res.json({ user: null })); });
 
-/* Сменить открытый кабинет. Для демо-аккаунтов — переход во второй демо-аккаунт, чтобы показать обе стороны сделки. */
 router.patch('/auth/me', requireUser, h(async (req, res) => {
   const next = parse(z.object({ role }), req.body).role;
   if (req.user.is_demo) {

@@ -1,9 +1,5 @@
-/* Taskly — справочники и стартовые демо-данные.
-   Структура сущностей повторяет будущую модель БД: projects, proposals, messages,
-   files, changeRequests, reviews, notifications. Изменяемые данные живут в store. */
 import { addDays, money } from '../lib/format.js';
 
-/* ---------------- Справочники ---------------- */
 export const directions = [
   { id: 'design', name: 'Дизайн' },
   { id: 'dev', name: 'Разработка' },
@@ -24,7 +20,6 @@ export const skills = [
   'Документация', 'Регламенты', 'Подбор данных', 'Оформление', 'Онбординг-материалы',
 ];
 
-/* Подсказки навыков по направлению — для онбординга и фильтров */
 export const skillsByDirection = {
   design: ['Figma', 'UI/UX', 'Лендинг', 'Брендинг', 'Иллюстрация', 'Презентации', 'Оформление'],
   dev: ['HTML/CSS', 'JavaScript', 'React', 'Python', 'Telegram-бот', 'WordPress', 'No-code'],
@@ -49,7 +44,6 @@ export const workFormats = [
   { id: 'ongoing', name: 'Возможна доработка' },
 ];
 
-/* Статусы проекта. tone → цвет точки: info синий, warn жёлтый, live акцент, stop красный, ok зелёный. */
 export const statuses = {
   published: { label: 'Опубликован', tone: 'info' },
   searching: { label: 'Идёт поиск исполнителя', tone: 'info' },
@@ -75,11 +69,9 @@ export const tasksamples = [
   'Настроить рассылку', 'Разобрать отзывы конкурентов', 'Собрать небольшой сервис',
 ];
 
-/* ---------------- Демо-аккаунты ---------------- */
 export const DEMO_BUSINESS = { id: 'c-me', name: 'Barber Loft', sphere: 'Услуги для людей', city: 'Алматы', contact: 'Айгерим, управляющая', email: 'hello@barberloft.kz', site: 'barberloft.kz' };
 export const DEMO_SPECIALIST_ID = 's-1';
 
-/* ---------------- Специалисты ---------------- */
 export const specialists = [
   {
     id: 's-1', name: 'Аружан Смагулова', initials: 'АС', avatar: 'avatar--a', handle: '@aruzhan.design', email: 'aruzhan@example.kz',
@@ -99,7 +91,6 @@ export const specialists = [
       { who: 'Lumen Studio', when: '3 недели назад', stars: 5, text: 'Уложилась в срок, отдала исходники в порядке. Будем работать ещё.', project: 'Оформление КП для Lumen Studio', tags: ['Аккуратные файлы'] },
       { who: 'Fit Corner', when: '1 месяц назад', stars: 4, text: 'Результат хороший, но на согласование ушло больше времени, чем ожидали.', project: 'Слайды для внутренней презентации', tags: ['Понятно объясняет'] },
     ],
-    /* Завершённые до начала демо — история, а не активные проекты. */
     archive: [
       { title: 'Лендинг для Tea Room', client: 'Tea Room', gross: 95000, when: '2 сентября', stars: 5 },
       { title: 'Оформление КП для Lumen Studio', client: 'Lumen Studio', gross: 45000, when: '15 августа', stars: 5 },
@@ -197,11 +188,6 @@ export const specialists = [
   },
 ];
 
-/* ---------------- Проекты ----------------
-   Одна таблица на всё: и каталог открытых задач, и проекты в работе.
-   mine — проект принадлежит демо-бизнесу. specialistId — выбранный исполнитель.
-   price — бюджет из ТЗ, agreedPrice/agreedDays — условия после выбора исполнителя.
-   dueDate считается от «сегодня», чтобы демо не устаревало. */
 const STAGES4 = ['Подготовка', 'Основная работа', 'Проверка', 'Финальный результат'];
 
 function seedProjects() {
@@ -269,7 +255,6 @@ function seedProjects() {
       directions: ['design'], skills: ['Figma', 'Оформление', 'Презентации'],
       posted: '1 неделю назад', stages: ['Структура', 'Макеты', 'Проверка', 'Финальные файлы'],
     },
-    /* ---- Открытые проекты других заказчиков ---- */
     {
       id: 'p-1045', title: 'Исследование: почему клиенты не возвращаются', client: 'Tea Room', clientId: 'c-5', verified: true, clientSince: 2025,
       brief: 'Нужно поговорить с 12 покупателями, которые приходили один раз, и понять причины. Записи разговоров приветствуются.',
@@ -371,12 +356,10 @@ function seedProjects() {
       posted: '1 день назад', stages: ['Структура', 'Слайды', 'Финальная проверка'],
     },
   ];
-  /* Отклики других специалистов, которых нет в демо-таблице proposals */
   const others = { 'p-1045': 3, 'p-1046': 6, 'p-1047': 14, 'p-1048': 2, 'p-1049': 5, 'p-1050': 7, 'p-1051': 5, 'p-1052': 10, 'p-1054': 4 };
   return list.map((p) => ({ ...base, stages: STAGES4, otherProposals: others[p.id] || 0, ...p }));
 }
 
-/* Отклики: одна таблица для обеих сторон. status: sent | viewed | invited | accepted | declined | withdrawn */
 function seedProposals() {
   return [
     { id: 'pr-1', projectId: 'p-1041', specialistId: 's-1', price: 100000, days: 12, created: '3 часа назад', status: 'sent', read: false,
@@ -391,7 +374,6 @@ function seedProposals() {
     { id: 'pr-4', projectId: 'p-1041', specialistId: 's-2', price: 130000, days: 8, created: '1 день назад', status: 'viewed', read: true,
       message: 'Могу сделать и вёрстку, и техническую часть: подключу форму, настрою отправку заявок. Есть опыт с подобными задачами.',
       portfolio: 'Бот записи для барбершопа' },
-    /* Отклики демо-специалиста на чужие проекты */
     { id: 'pr-5', projectId: 'p-1054', specialistId: 's-1', price: 65000, days: 5, created: '1 день назад', status: 'sent', read: false,
       message: 'Приведу слайды к единой сетке и типографике, графики соберу из ваших таблиц.', portfolio: 'Учебный проект: сервис аренды' },
     { id: 'pr-6', projectId: 'p-1050', specialistId: 's-1', price: 98000, days: 8, created: '3 дня назад', status: 'viewed', read: true,
@@ -403,8 +385,6 @@ function seedProposals() {
   ];
 }
 
-/* Сообщения: from = 'client' | 'specialist' | 'system' — роль, а не конкретный пользователь,
-   поэтому переписка одинаково читается с обеих сторон. */
 function seedMessages() {
   return {
     'p-1042': [
@@ -426,7 +406,6 @@ function seedMessages() {
   };
 }
 
-/* who: client | specialist | sealed (ТЗ, зафиксировано платформой) */
 function seedFiles() {
   return {
     'p-1042': [
@@ -452,7 +431,6 @@ function seedFiles() {
   };
 }
 
-/* Изменения задачи: proposedBy — кто предложил; решает вторая сторона. */
 function seedChangeRequests() {
   return [
     { id: 'cr-1', projectId: 'p-1042', proposedBy: 'client', status: 'pending',
@@ -477,7 +455,6 @@ function seedReviews() {
   ];
 }
 
-/* Уведомления: to — куда ведёт клик. */
 function seedNotifications() {
   return [
     { id: 'n-1', role: 'client', to: '/biz/workspace/p-1044', text: 'Исполнитель отправил результат по проекту «Оформить коммерческое предложение в PDF»', when: '40 минут назад', unread: true, kind: 'delivery' },

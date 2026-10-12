@@ -1,11 +1,3 @@
-/* ==========================================================================
-   Taskly — design tokens
-   Direction: Clean B2B SaaS. Warm off-white base, near-black ink,
-   one restrained red-orange accent. No gradients screaming, no chaos.
-   ========================================================================== */
-
-/* Четыре сабсета Onest. cyrillic-ext нужен для казахских букв (Ә Қ Ғ Ө Ү Һ Ң),
-   latin-ext — в том числе для знака тенге ₸ (U+20B8). */
 @font-face {
   font-family: 'Onest';
   font-style: normal;
@@ -40,7 +32,6 @@
 }
 
 :root {
-  /* Type ------------------------------------------------------------------ */
   --font-sans: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 
@@ -59,7 +50,6 @@
   --lh-head: 1.25;
   --lh-body: 1.6;
 
-  /* Colour: warm porcelain ------------------------------------------------ */
   --bg: #faf8f5;
   --surface: #ffffff;
   --surface-2: #f4f1eb;
@@ -72,14 +62,12 @@
   --ink-3: #7d7a84;
   --ink-inv: #ffffff;
 
-  /* Accent: restrained red-orange */
   --accent: #e04e2a;
   --accent-hover: #c74320;
   --accent-press: #ad3a1c;
   --accent-soft: #fbeee8;
   --accent-line: #f2cdbf;
 
-  /* Muted status tones — never fluorescent */
   --ok: #2c7358;
   --ok-soft: #eaf3ee;
   --info: #35597f;
@@ -90,7 +78,6 @@
   --stop-soft: #f8ecea;
   --neutral-soft: #f1eee8;
 
-  /* Radius ---------------------------------------------------------------- */
   --r-xs: 5px;
   --r-sm: 7px;
   --r-md: 10px;
@@ -98,14 +85,12 @@
   --r-xl: 20px;
   --r-full: 999px;
 
-  /* Shadow: barely there -------------------------------------------------- */
   --sh-xs: 0 1px 1px rgba(23, 22, 26, 0.03);
   --sh-sm: 0 1px 2px rgba(23, 22, 26, 0.04), 0 1px 1px rgba(23, 22, 26, 0.03);
   --sh-md: 0 6px 20px rgba(23, 22, 26, 0.07);
   --sh-lg: 0 18px 48px rgba(23, 22, 26, 0.12);
   --ring: 0 0 0 3px rgba(224, 78, 42, 0.16);
 
-  /* Space scale ----------------------------------------------------------- */
   --s1: 4px;
   --s2: 8px;
   --s3: 12px;
@@ -119,7 +104,6 @@
   --s20: 80px;
   --s24: 112px;
 
-  /* Layout ---------------------------------------------------------------- */
   --w-page: 1180px;
   --w-text: 720px;
   --w-app: 1320px;
@@ -163,7 +147,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
   border-radius: var(--r-xs);
 }
 
-/* Type helpers ------------------------------------------------------------ */
 .t-display { font-size: var(--fs-display); line-height: 1.04; letter-spacing: -0.035em; font-weight: 600; }
 .t-h1 { font-size: var(--fs-h1); line-height: var(--lh-tight); letter-spacing: -0.03em; font-weight: 600; }
 .t-h2 { font-size: var(--fs-h2); line-height: var(--lh-head); letter-spacing: -0.025em; font-weight: 600; }
@@ -179,7 +162,6 @@ ul, ol { margin: 0; padding: 0; list-style: none; }
 .num { font-variant-numeric: tabular-nums; }
 .nowrap { white-space: nowrap; }
 
-/* Layout helpers ---------------------------------------------------------- */
 .page { width: 100%; max-width: var(--w-page); margin: 0 auto; padding: 0 var(--s6); }
 .app { width: 100%; max-width: var(--w-app); margin: 0 auto; padding: 0 var(--s6); }
 .stack { display: flex; flex-direction: column; }

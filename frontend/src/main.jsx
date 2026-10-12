@@ -14,7 +14,6 @@ import { Workspace } from './pages/workspace.jsx';
 import { SpecDashboard, SpecProjects, SpecProjectDetail, SpecApply, SpecProposals, SpecMessages, SpecPayout, SpecReviews, SpecHistory, SpecProfile, SpecProfileEdit } from './pages/specialist.jsx';
 import { HowPage, SecurityPage, PricingPage, FaqPage, SupportPage, NotificationsPage, SettingsPage, LegalPage, UiKitPage, MapPage } from './pages/meta.jsx';
 
-/* Ошибка на одной странице не должна ронять всё приложение */
 class PageBoundary extends React.Component {
   constructor(props) { super(props); this.state = { error: null }; }
   static getDerivedStateFromError(error) { return { error }; }
@@ -49,7 +48,6 @@ function NotFound() {
 
 const ROLE_NAME = { client: 'бизнеса', specialist: 'специалиста' };
 
-/* Доступ к кабинетам: гостю предлагаем войти, при чужой роли — переключиться (в демо). */
 function Gate({ need, children }) {
   const app = useApp();
   const ok = need === 'any' ? app.role !== 'guest' : app.role === need;
@@ -82,7 +80,6 @@ const PUBLIC = {
   '/signin': SignIn, '/signup': SignUp,
   '/onboarding/business': OnboardingBusiness, '/onboarding/specialist': OnboardingSpecialist,
   '/ui-kit': UiKitPage, '/map': MapPage,
-  /* Каталоги открыты гостям: смотреть можно без регистрации */
   '/spec/projects': SpecProjects, '/biz/specialists': BizSpecialists,
 };
 const CLIENT = {
@@ -100,7 +97,6 @@ function Router() {
   const { path, seg, params } = parseRoute(app.route);
   const at = (i) => seg[i];
 
-  /* Маршруты с id */
   if (seg[0] === 'biz' && seg[1] === 'workspace' && at(2) && seg.length === 3) return <Gate need="client"><Workspace id={at(2)} section={params.get('s') || 'overview'} /></Gate>;
   if (seg[0] === 'spec' && seg[1] === 'workspace' && at(2) && seg.length === 3) return <Gate need="specialist"><Workspace id={at(2)} section={params.get('s') || 'overview'} /></Gate>;
   if (seg[0] === 'biz' && seg[1] === 'specialists' && at(2) && seg.length === 3) return <BizSpecialistProfile id={at(2)} />;
@@ -124,7 +120,6 @@ function Router() {
 function App() {
   const app = useApp();
   useEffect(() => { applyTweaks(app.tweaks); }, [app.tweaks]);
-  /* Пока не пришёл первый ответ сервера, не показываем страницы — иначе мелькнёт «войдите» или «проект не найден» */
   if (!app.ready) {
     return (
       <main className="page" style={{ minHeight: '70vh', display: 'grid', placeItems: 'center' }}>

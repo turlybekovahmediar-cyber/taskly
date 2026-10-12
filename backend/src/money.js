@@ -1,5 +1,3 @@
-/* Деньги — целые тенге. Комиссия Taskly 5% удерживается со специалиста при выплате.
-   Считается только здесь: суммам, пришедшим с фронтенда, сервер не доверяет. */
 export const FEE = 0.05;
 export const commission = (price) => {
   const p = Math.max(0, Math.round(Number(price) || 0));

@@ -1,18 +1,12 @@
-# Зависимости и сборка
 node_modules/
 dist/
 
-# Секреты: пароль базы и ключ подписи (шаблон .env.example — коммитим)
 .env
 .env.*
 !.env.example
 
-# Логи, системные и редакторские файлы
 *.log
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
-
-# Локальные настройки Claude Code
-.claude/

@@ -1,9 +1,7 @@
-/* Подключение к PostgreSQL. query — одиночный запрос, tx — транзакция. */
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 
-/* backend/.env — локально; на хостинге переменные задаются в панели */
 dotenv.config({ path: fileURLToPath(new URL('../.env', import.meta.url)), quiet: true });
 
 if (!process.env.DATABASE_URL) {
@@ -11,7 +9,6 @@ if (!process.env.DATABASE_URL) {
   process.exit(1);
 }
 
-/* date → строка YYYY-MM-DD, без сдвига часового пояса */
 pg.types.setTypeParser(1082, (v) => v);
 
 export const pool = new pg.Pool({

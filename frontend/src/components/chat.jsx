@@ -1,13 +1,10 @@
-/* Переписка по проекту. Сообщение «моё», если его автор — моя роль (client | specialist). */
 import React, { useEffect, useRef, useState } from 'react';
 import { Icon, useApp, Btn, Avatar, Badge, Empty } from './ui.jsx';
 import { specialistById, projectById } from '../store/store.jsx';
 import { initials } from '../lib/format.js';
 
-/* Карточка «вторая сторона» для заказчика: аватар компании */
 export const clientPerson = (name) => ({ name, initials: initials(name), avatar: 'avatar--b' });
 
-/* Кто есть кто в проекте с точки зрения роли */
 export function useParties(p) {
   const app = useApp();
   const spec = specialistById(p?.specialistId);
@@ -69,7 +66,6 @@ export function ChatThread({ projectId, maxHeight }) {
   );
 }
 
-/* Раздел «Сообщения»: список проектов слева, переписка справа */
 export function Inbox({ projects, workspaceBase }) {
   const app = useApp();
   const [q, setQ] = useState('');

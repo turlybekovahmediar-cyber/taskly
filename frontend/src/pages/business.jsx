@@ -1,4 +1,3 @@
-/* Taskly — кабинет бизнеса: дашборд, проекты, мастер создания, предпросмотр ТЗ, опубликованный проект. */
 import React, { useState, useEffect } from 'react';
 import { Icon, useApp, Btn, Link, Field, Tag, Badge, StatusPill, Avatar, Modal, Empty, Money, PayoutRows, SafeNote, Rail, Metric, Tabs, useSoon } from '../components/ui.jsx';
 import { AppShell, SideNav } from '../components/shell.jsx';
@@ -26,16 +25,13 @@ function BizShell({ title, sub, crumbs, actions, children }) {
   );
 }
 
-/* Проекты демо-бизнеса с учётом режима «пустой аккаунт» */
 export function useMyProjects() {
   const app = useApp();
   return app.emptyMode ? [] : app.entities.projects.filter((p) => p.mine);
 }
 
-/* Куда ведёт карточка проекта: открытый — на страницу проекта, остальные — в рабочее пространство */
 export const bizProjectUrl = (p) => (isOpen(p) ? '/biz/projects/' + p.id : '/biz/workspace/' + p.id);
 
-/* Что требует действия заказчика — вычисляется из состояния проектов */
 function useClientTodo(mine) {
   const app = useApp();
   const items = [];
@@ -58,7 +54,6 @@ function useClientTodo(mine) {
   return items;
 }
 
-/* ============================ Обзор ============================ */
 function BizDashboard() {
   const app = useApp();
   const mine = useMyProjects();
@@ -151,7 +146,6 @@ function BizDashboard() {
   );
 }
 
-/* ---------------------- Карточки проекта ---------------------- */
 const nextStep = (p, e) => {
   switch (p.status) {
     case 'searching': case 'published': return pluralN(proposalsOf(e, p.id).length, W.proposal) + ' · выберите исполнителя';
@@ -217,7 +211,6 @@ function ProjectRow({ p }) {
   );
 }
 
-/* ============================ Мои проекты ============================ */
 function BizProjects() {
   const app = useApp();
   const [tab, setTab] = useState('active');
@@ -268,7 +261,6 @@ function BizProjects() {
   );
 }
 
-/* ============================ Мастер создания проекта ============================ */
 const WIZ_STEPS = [
   { t: 'Что нужно сделать', s: 'Задача своими словами' },
   { t: 'Какой результат', s: 'Что должно быть на выходе' },
@@ -286,7 +278,6 @@ export const emptyDraft = () => ({
   directions: [], level: 'junior', format: ['remote'], stages: true, note: '',
 });
 
-/* Проверка черновика — одна функция и для кнопки «Продолжить», и для предпросмотра */
 export function validateDraft(f, upTo = 5) {
   const e = {};
   if (upTo >= 0) {
@@ -315,7 +306,6 @@ function BizNewProject() {
   const [includeInput, setIncludeInput] = useState('');
   const [err, setErr] = useState({});
 
-  /* Черновик сохраняется по ходу заполнения — ничего не теряется при уходе со страницы */
   useEffect(() => { const t = setTimeout(() => app.saveDraft(f), 300); return () => clearTimeout(t); }, [f]);
 
   const addInclude = () => { if (includeInput.trim()) { set('includes', [...f.includes, includeInput.trim()]); setIncludeInput(''); } };
@@ -574,7 +564,6 @@ function BizNewProject() {
   );
 }
 
-/* ============================ Предпросмотр ТЗ ============================ */
 function TzBody({ p }) {
   return (
     <>
@@ -615,7 +604,6 @@ function TzBody({ p }) {
   );
 }
 
-/* Черновик → проект для отображения */
 const draftToProject = (d) => ({
   ...d,
   excludes: d.excludes.split(/\n|,/).map((x) => x.trim()).filter(Boolean),
@@ -740,14 +728,12 @@ function BizTzPreview() {
   );
 }
 
-/* ============================ Опубликованный проект (взгляд заказчика) ============================ */
 function BizProjectPublic({ id }) {
   const app = useApp();
   const soon = useSoon();
   const p = app.entities.projects.find((x) => x.id === id && x.mine);
   if (!p) return <ProjectMissing />;
   if (!isOpen(p)) {
-    /* Исполнитель уже выбран — вся работа в рабочем пространстве */
     return (
       <AppShell wide crumbs={[{ label: 'Мои проекты', to: '/biz/projects' }, { label: p.title }]} title={p.title}>
         <div className="card" style={{ maxWidth: 640 }}>

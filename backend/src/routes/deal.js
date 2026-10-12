@@ -1,9 +1,3 @@
-/* Проекты и сделка. Каждый шаг проверяет: кто делает (заказчик или исполнитель), из какого статуса
-   (иначе 409) и лимиты. Шаги с деньгами — в транзакции.
-
-   draft ─publish→ searching ─select→ awaiting_payment ─payment→ in_work ─deliver→ on_review ─accept→ done
-                                                                       needs_fix ←request-fix┘   ↑
-                                                                           └────── deliver ──────┘          */
 import { Router } from 'express';
 import { z } from 'zod';
 import { tx } from '../db.js';
@@ -30,7 +24,6 @@ async function lockProject(db, id) {
   need(rows[0], 404, 'Проект не найден');
   return rows[0];
 }
-/* Проект, в котором пользователь — участник с нужной ролью */
 async function lockAs(db, id, user, role) {
   const p = await lockProject(db, id);
   const rel = relation(p, user.id);
@@ -43,7 +36,6 @@ const str = (min, max, msg) => z.string().trim().min(min, msg).max(max);
 const strList = (max, len = 200) => z.array(z.string().trim().min(1).max(len)).max(max);
 const int = (min, max, msg) => z.coerce.number({ message: msg }).int(msg).min(min, msg).max(max, msg);
 
-/* ---------------- Публикация проекта из черновика мастера ---------------- */
 const DraftBody = z.object({
   title: str(4, 140, 'Назовите проект — хотя бы коротко'),
   brief: str(20, 5000, 'Опишите задачу подробнее, минимум 2–3 предложения'),
@@ -82,7 +74,6 @@ router.post('/projects', h(async (req, res) => {
   await sendState(res, req.user.id, { id });
 }));
 
-/* ---------------- Отклики ---------------- */
 router.post('/projects/:id/proposals/read', h(async (req, res) => {
   await tx(async (db) => {
     await lockAs(db, req.params.id, req.user, 'client');
@@ -115,7 +106,6 @@ router.post('/projects/:id/proposals', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-/* Заказчик приглашает специалиста в свой открытый проект — появляется отклик со статусом invited */
 const InviteBody = z.object({
   specialistId: z.string().min(1),
   message: str(10, 3000, 'Напишите пару слов о задаче'),
@@ -151,7 +141,6 @@ async function lockOwnProposal(db, id, user) {
   return rows[0];
 }
 
-/* Отозвать отклик или отказаться от приглашения */
 router.post('/proposals/:id/withdraw', h(async (req, res) => {
   await tx(async (db) => {
     const pr = await lockOwnProposal(db, req.params.id, req.user);
@@ -165,7 +154,6 @@ router.post('/proposals/:id/withdraw', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-/* Закрепить исполнителя: общая часть для «заказчик выбрал» и «специалист подтвердил приглашение» */
 async function assign(db, p, pr) {
   await db.query(`UPDATE proposals SET status = 'accepted', read = true WHERE id = $1`, [pr.id]);
   const others = await db.query(`
@@ -208,7 +196,6 @@ router.post('/proposals/:id/confirm', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-/* ---------------- Оплата (демо-провайдер: резерв → выплата) ---------------- */
 router.post('/projects/:id/payment', h(async (req, res) => {
   await tx(async (db) => {
     const { p } = await lockAs(db, req.params.id, req.user, 'client');
@@ -224,7 +211,6 @@ router.post('/projects/:id/payment', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-/* ---------------- Работа и сдача ---------------- */
 router.post('/projects/:id/stages/complete', h(async (req, res) => {
   await tx(async (db) => {
     const { p } = await lockAs(db, req.params.id, req.user, 'specialist');
@@ -286,7 +272,6 @@ router.post('/projects/:id/accept', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-/* ---------------- Отзывы и переписка ---------------- */
 const ReviewBody = z.object({
   stars: int(1, 5, 'Поставьте оценку от 1 до 5'),
   tags: strList(8, 40).default([]),
@@ -320,7 +305,6 @@ router.post('/projects/:id/messages', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-/* ---------------- Изменение задачи: предлагает одна сторона, решает другая ---------------- */
 const ChangeBody = z.object({
   title: str(3, 140, 'Назовите изменение'),
   what: str(10, 3000, 'Опишите, что именно меняется и почему'),

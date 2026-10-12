@@ -1,10 +1,8 @@
-/* Taskly — оболочка: шапка, футер, кабинет, демо-панель. */
 import React, { useState, useEffect, useRef } from 'react';
 import { Icon, useApp, Link, Dropdown, Badge } from './ui.jsx';
 import { parseRoute } from '../lib/router.js';
 import { shortName } from '../lib/format.js';
 
-/* ------------------------------- Logo ------------------------------- */
 function Logo({ to }) {
   return (
     <Link to={to || '/'} className="logo" aria-label="Taskly — на главную">
@@ -14,7 +12,6 @@ function Logo({ to }) {
   );
 }
 
-/* ------------------------------ Header ------------------------------ */
 const PUBLIC_NAV = [
   { label: 'Найти проекты', to: '/spec/projects' },
   { label: 'Найти специалистов', to: '/biz/specialists' },
@@ -144,7 +141,6 @@ function Header() {
   );
 }
 
-/* ------------------------------ Footer ------------------------------ */
 function Footer() {
   const cols = [
     { h: 'Платформа', links: [['Найти проекты', '/spec/projects'], ['Найти специалистов', '/biz/specialists'], ['Как это работает', '/how'], ['Безопасная сделка', '/security']] },
@@ -181,7 +177,6 @@ function Footer() {
   );
 }
 
-/* --------------------------- App shell ----------------------------- */
 function Crumbs({ items }) {
   return (
     <nav className="crumbs" aria-label="Хлебные крошки">
@@ -237,12 +232,10 @@ function SideNav({ items, label }) {
   );
 }
 
-/* -------------------------- Демо-панель -------------------------- */
 const ACCENTS = ['#e04e2a', '#c2452f', '#d2691e', '#b4432b'];
 const RADII = { 'обычный': ['5px', '7px', '10px', '14px', '20px'], 'скруглённый': ['8px', '11px', '14px', '18px', '24px'], 'строгий': ['2px', '4px', '6px', '8px', '10px'] };
 const DENSITY = { 'плотная': ['18px', '24px', '36px', '48px'], 'обычная': ['24px', '32px', '48px', '64px'], 'просторная': ['30px', '40px', '56px', '80px'] };
 
-/* Затемнение HEX-цвета для hover/press состояний акцента */
 function shade(hex, k) {
   const n = parseInt(hex.slice(1), 16);
   const f = (v) => Math.max(0, Math.min(255, Math.round(v * (1 - k))));

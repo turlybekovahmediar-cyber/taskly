@@ -1,5 +1,3 @@
-/* Taskly — общие страницы: как это работает, безопасность, комиссия, FAQ, поддержка,
- юридические тексты, уведомления, настройки, UI-kit и карта продукта. */
 import React, { useState } from 'react';
 import { Icon, useApp, Btn, Link, Field, Tag, Badge, StatusPill, Avatar, Modal, Empty, Skel, Ph, Money, FeeCalc, SafeNote, Rail, Metric, Tabs, Stars } from '../components/ui.jsx';
 import { AppShell } from '../components/shell.jsx';
@@ -8,7 +6,6 @@ import { statuses, directions, skills, specialists } from '../data/mock.js';
 import { money } from '../lib/format.js';
 import { navigate as nav, parseRoute } from '../lib/router.js';
 
-/* ============================ Как это работает ============================ */
 function HowPage() {
   const app = useApp();
   const [side, setSide] = useState('business');
@@ -126,7 +123,6 @@ function HowPage() {
   );
 }
 
-/* Переиспользуемые модели — показываем механику ТЗ и изменений */
 function ModelTz() {
   return (
     <div className="card card--pad-lg stack g4">
@@ -163,7 +159,6 @@ function ModelChange() {
   );
 }
 
-/* ============================ Безопасность сделки ============================ */
 function SecurityPage() {
   const app = useApp();
   return (
@@ -254,7 +249,6 @@ function SecurityPage() {
   );
 }
 
-/* ============================ Комиссия ============================ */
 function PricingPage() {
   const app = useApp();
   const [price, setPrice] = useState(100000);
@@ -341,7 +335,6 @@ function PricingPage() {
   );
 }
 
-/* ============================ FAQ ============================ */
 function FaqPage() {
   const app = useApp();
   const [q, setQ] = useState('');
@@ -410,7 +403,6 @@ function FaqPage() {
   );
 }
 
-/* ============================ Поддержка ============================ */
 function SupportPage() {
   const app = useApp();
   const [tab, setTab] = useState('new');
@@ -544,7 +536,6 @@ function SupportPage() {
   );
 }
 
-/* ============================ Уведомления ============================ */
 function NotificationsPage() {
   const app = useApp();
   const role = app.role === 'specialist' ? 'specialist' : 'client';
@@ -596,7 +587,6 @@ function NotificationsPage() {
   );
 }
 
-/* ============================ Настройки ============================ */
 function SettingsPage() {
   const app = useApp();
   const initialTab = parseRoute(app.route).params.get('tab');
@@ -778,7 +768,6 @@ function SettingsPage() {
   );
 }
 
-/* ============================ Юридические страницы ============================ */
 function LegalPage({ kind }) {
   const isTerms = kind === 'terms';
   return (
@@ -837,7 +826,6 @@ function LegalPage({ kind }) {
   );
 }
 
-/* ============================ UI-kit ============================ */
 function UiKitPage() {
   const app = useApp();
   const [chip, setChip] = useState('Figma');
@@ -1173,7 +1161,6 @@ function Block({ title, note, children }) {
   );
 }
 
-/* ============================ Карта продукта ============================ */
 function MapPage() {
   const app = useApp();
   const [side, setSide] = useState('business');

@@ -1,4 +1,3 @@
-/* Taskly — вход, регистрация и онбординг обеих сторон. */
 import React, { useState } from 'react';
 import { Icon, useApp, Btn, Link, Field, Ph } from '../components/ui.jsx';
 import { directions, skillsByDirection, spheres } from '../data/mock.js';
@@ -40,7 +39,6 @@ function RoleToggle({ value, onChange }) {
   );
 }
 
-/* ============================ Вход ============================ */
 function SignIn() {
   const app = useApp();
   const [role, setRole] = useState('client');
@@ -102,7 +100,6 @@ function SignIn() {
   );
 }
 
-/* ============================ Регистрация ============================ */
 function SignUp() {
   const app = useApp();
   const initialRole = parseRoute(app.route).params.get('role') === 'specialist' ? 'specialist' : 'client';
@@ -134,7 +131,6 @@ function SignUp() {
       app.toast('Аккаунт создан');
     } catch (ex) {
       setBusy(false);
-      /* Занятый email — возвращаем на первый шаг к нужному полю */
       if (ex.status === 409) { setStep(1); setErr({ email: ex.message }); } else setErr({ form: ex.message });
     }
   };
@@ -209,7 +205,6 @@ function SignUp() {
   );
 }
 
-/* ======================= Онбординг: бизнес ======================= */
 function OnboardingBusiness() {
   const app = useApp();
   const [step, setStep] = useState(1);
@@ -218,7 +213,6 @@ function OnboardingBusiness() {
   const [pays, setPays] = useState('Разово под конкретную задачу');
   const [site, setSite] = useState(app.business?.site || '');
   const toggle = (t) => setTasks((a) => (a.includes(t) ? a.filter((x) => x !== t) : [...a, t]));
-  /* Сохраняем профиль компании и переходим дальше */
   const finish = async (to) => { await app.updateBusiness({ sphere, site: site.trim() }); app.navigate(to); };
 
   return (
@@ -349,7 +343,6 @@ function OnboardingBusiness() {
   );
 }
 
-/* ===================== Онбординг: специалист ===================== */
 function OnboardingSpecialist() {
   const app = useApp();
   const [step, setStep] = useState(1);

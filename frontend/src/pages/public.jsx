@@ -1,4 +1,3 @@
-/* Taskly — публичные страницы: главная, для бизнеса, для специалистов. */
 import React, { useState } from 'react';
 import { Icon, useApp, Btn, Link, Tag, Badge, Money, FeeCalc, Avatar, Metric } from '../components/ui.jsx';
 import { tasksamples, directions, specialists, OPEN_STATUSES } from '../data/mock.js';
@@ -17,7 +16,6 @@ function SectionHead({ eyebrow, title, sub, right, narrow }) {
   );
 }
 
-/* Мини-карточка проекта — визуальный язык продукта, используется в hero. */
 function PreviewCard() {
   return (
     <div className="card card--pad-lg stack g5" style={{ boxShadow: 'var(--sh-md)' }}>
@@ -45,7 +43,6 @@ function PreviewCard() {
   );
 }
 
-/* ============================ Главная ============================ */
 function HomePage() {
   const app = useApp();
   const steps = {
@@ -63,7 +60,6 @@ function HomePage() {
 
   return (
     <main>
-      {/* Hero */}
       <section className="page" style={{ paddingTop: 'var(--s20)', paddingBottom: 'var(--s20)' }}>
         <div className="hero-grid">
           <div className="stack g6">
@@ -89,7 +85,6 @@ function HomePage() {
 
       <hr className="hr" />
 
-      {/* Как работает */}
       <section className="page sec">
         <SectionHead eyebrow="Как это работает" title="Три шага с каждой стороны"
           sub="Никаких сложных настроек и лишних экранов: задача → исполнитель → результат." />
@@ -118,7 +113,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Защита сделки */}
       <section style={{ background: 'var(--ink)', color: 'var(--ink-inv)', padding: 'var(--s24) 0' }}>
         <div className="page">
           <div className="stack g3" style={{ maxWidth: 700, marginBottom: 'var(--s12)' }}>
@@ -149,7 +143,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Для бизнеса */}
       <section className="page sec">
         <div className="hero-grid">
           <div className="stack g6">
@@ -201,7 +194,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Для специалистов */}
       <section style={{ background: 'var(--surface-2)', padding: 'var(--s24) 0' }}>
         <div className="page">
           <SectionHead eyebrow="Для специалистов"
@@ -253,7 +245,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Примеры задач */}
       <section className="page sec">
         <SectionHead narrow eyebrow="Примеры задач"
           title="Что размещают на Taskly"
@@ -282,7 +273,6 @@ function HomePage() {
         </div>
       </section>
 
-      {/* Финальный CTA */}
       <section className="page" style={{ paddingBottom: 'var(--s24)' }}>
         <div className="card card--pad-lg stack g8" style={{ background: 'var(--surface-2)', borderColor: 'transparent', textAlign: 'center', alignItems: 'center' }}>
           <div className="stack g3" style={{ maxWidth: 620, alignItems: 'center' }}>
@@ -300,7 +290,6 @@ function HomePage() {
   );
 }
 
-/* ============================ Для бизнеса ============================ */
 function BusinessPage() {
   const app = useApp();
   const faq = [
@@ -419,7 +408,6 @@ function Accordion({ q, a, defaultOpen }) {
   );
 }
 
-/* ============================ Для специалистов ============================ */
 function SpecialistsPage() {
   const app = useApp();
   const s = specialists[0];

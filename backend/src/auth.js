@@ -1,4 +1,3 @@
-/* Вход: подписанный токен (JWT) в httpOnly-cookie. JavaScript на странице его не видит. */
 import jwt from 'jsonwebtoken';
 import { query } from './db.js';
 
@@ -24,7 +23,6 @@ export const USER_SQL = `
   LEFT JOIN specialist_profiles sp ON sp.user_id = u.id
   WHERE u.id = $1`;
 
-/* Middleware: req.user — текущий пользователь или null */
 export async function loadUser(req, res, next) {
   req.user = null;
   const token = req.cookies?.[COOKIE];

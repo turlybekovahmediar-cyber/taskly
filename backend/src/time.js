@@ -1,4 +1,3 @@
-/* Подписи времени для интерфейса: «2 часа назад», «26 сентября, 10:02». Часовой пояс — Алматы. */
 const TZ = 'Asia/Almaty';
 
 const plural = (n, [one, few, many]) => {
@@ -37,10 +36,8 @@ const dayFmt = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'long',
 
 export const stamp = (ts) => (ts ? stampFmt.format(new Date(ts)).replace(' в ', ', ') : '');
 export const dayLabel = (ts) => (ts ? dayFmt.format(new Date(ts)) : '');
-/* «сегодня» для свежих файлов, иначе дата */
 export const fileDay = (ts) => (ts && Date.now() - new Date(ts).getTime() < 864e5 && dayFmt.format(new Date(ts)) === dayFmt.format(new Date()) ? 'сегодня' : dayLabel(ts));
 
-/* Обратное преобразование подписей демо-данных («3 часа назад», «26 сентября, 10:02») в дату — нужно только для seed */
 const MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
 export function parseLabel(label) {
   const now = Date.now();

@@ -1,5 +1,3 @@
-/* Минимальный роутер на History API: чистые URL вместо #-маршрутов.
-   Состояние маршрута — строка «/path?query», подписка через useRoute(). */
 import { useEffect, useState } from 'react';
 
 const listeners = new Set();
@@ -15,7 +13,6 @@ export function navigate(to, { replace = false } = {}) {
 
 window.addEventListener('popstate', () => listeners.forEach((fn) => fn(current())));
 
-/* Совместимость со старыми ссылками вида /Taskly.html#/biz */
 if (location.hash.startsWith('#/')) history.replaceState(null, '', location.hash.slice(1));
 
 export function useRoute() {

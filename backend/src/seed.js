@@ -1,20 +1,15 @@
-/* Демо-данные для защиты: те же проекты, отклики и переписка, что были во фронтенде (frontend/src/data/mock.js),
-   но теперь в базе и с настоящими аккаунтами.
-   Запуск вручную: npm run seed            — заполнить, если база пустая
-                   npm run seed -- --reset — очистить всё и заполнить заново */
 import bcrypt from 'bcryptjs';
 import { seedEntities, specialists, DEMO_BUSINESS } from '../../frontend/src/data/mock.js';
 import { parseLabel } from './time.js';
 import { commission } from './money.js';
 import { isMain } from './isMain.js';
 
-/* Демо-входы. Пароль общий; кнопки «Быстрый вход» на сайте входят без него. */
 export const DEMO_PASSWORD = 'taskly2026';
 export const DEMO_ACCOUNTS = {
   client: { id: 'c-1', email: 'biz@taskly.demo' },
   specialist: { id: 's-1', email: 'aruzhan@taskly.demo' },
 };
-const NO_LOGIN = '!'; // такой хеш не совпадает ни с одним паролем — у остальных демо-пользователей входа нет
+const NO_LOGIN = '!';
 
 const LEVEL = { verified: 'verified', experienced: 'experienced', new: 'new' };
 const clientIdOf = (id) => (id === 'c-me' ? DEMO_ACCOUNTS.client.id : id);
@@ -23,7 +18,6 @@ export async function seedDemo(db) {
   const e = seedEntities();
   const hash = await bcrypt.hash(DEMO_PASSWORD, 10);
 
-  /* ---- Заказчики: демо-бизнес и компании из каталога ---- */
   const clients = new Map([[DEMO_ACCOUNTS.client.id, { company: DEMO_BUSINESS.name, verified: true, since: 2025, demo: true }]]);
   for (const p of e.projects) {
     const id = clientIdOf(p.clientId);
@@ -38,7 +32,6 @@ export async function seedDemo(db) {
       [id, c.company, c.demo ? DEMO_BUSINESS.sphere : null, c.demo ? DEMO_BUSINESS.city : null, c.demo ? DEMO_BUSINESS.site : null, c.verified, c.since]);
   }
 
-  /* ---- Специалисты ---- */
   for (const s of specialists) {
     const demo = s.id === DEMO_ACCOUNTS.specialist.id;
     await db.query(
@@ -54,7 +47,6 @@ export async function seedDemo(db) {
           reviewList: s.reviewList, archive: s.archive })]);
   }
 
-  /* ---- Проекты ---- */
   for (const p of e.projects) {
     await db.query(
       `INSERT INTO projects (id, client_id, specialist_id, title, brief, result, includes, excludes, materials, requirements,
@@ -126,20 +118,16 @@ export async function seedDemo(db) {
 
 export const ALL_TABLES = 'saved_projects, notifications, reviews, change_requests, files, messages, payments, proposals, projects, specialist_profiles, business_profiles, users';
 
-/* Сброс демо-мира: удалить демо-пользователей (с их проектами, откликами, перепиской) и заполнить заново.
-   Аккаунты, зарегистрированные вручную, остаются. */
 export async function resetDemoData(db) {
   await db.query(`DELETE FROM users WHERE email LIKE '%taskly.demo'`);
   await seedDemo(db);
 }
 
-/* Полный сброс: очистить все таблицы и заполнить демо-данными */
 export async function resetDemo(db) {
   await db.query(`TRUNCATE ${ALL_TABLES} CASCADE`);
   await seedDemo(db);
 }
 
-/* Запуск из командной строки */
 if (isMain(import.meta.url)) {
   const { tx, pool } = await import('./db.js');
   const { migrate } = await import('./migrate.js');

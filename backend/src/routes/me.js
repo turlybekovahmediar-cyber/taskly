@@ -1,6 +1,3 @@
-/* Профиль и личные данные текущего пользователя.
-   PUT /api/me/draft · PATCH /api/me/business · PATCH /api/me/specialist · PUT|DELETE /api/me/saved/:projectId
-   POST /api/notifications/:id/read · POST /api/notifications/read-all · POST /api/demo/reset */
 import { Router } from 'express';
 import { z } from 'zod';
 import { query, tx } from '../db.js';
@@ -14,7 +11,6 @@ router.use(['/me', '/notifications', '/demo'], requireUser);
 const str = (max) => z.string().trim().max(max);
 const list = (max, len = 80) => z.array(z.string().trim().min(1).max(len)).max(max);
 
-/* Черновик мастера создания проекта — сохраняется по ходу заполнения */
 router.put('/me/draft', h(async (req, res) => {
   const draft = req.body && typeof req.body === 'object' && Object.keys(req.body).length ? req.body : null;
   if (draft && JSON.stringify(draft).length > 20000) fail(413, 'Черновик слишком большой');
@@ -76,7 +72,6 @@ router.post('/notifications/read-all', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-/* Сброс базы к демо-данным — только из демо-аккаунта (для подготовки к показу) */
 router.post('/demo/reset', h(async (req, res) => {
   if (!req.user.is_demo) fail(403, 'Сброс доступен только в демо-аккаунте');
   await tx(resetDemoData);

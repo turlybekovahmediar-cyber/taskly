@@ -1,6 +1,3 @@
-/* Снимок данных для фронтенда — ровно то, что текущему пользователю можно видеть.
-   Форма совпадает с entities во frontend/src/store/store.jsx, поэтому страницы не пришлось переписывать.
-   Гость видит каталог открытых проектов, специалистов и отзывы. */
 import { query } from './db.js';
 import { ago, stamp, dayLabel, fileDay } from './time.js';
 
@@ -46,7 +43,6 @@ function serializeProject(r, me, visibleProposals) {
     reviewByClient: r.review_by_client, reviewBySpecialist: r.review_by_specialist,
     completedAt: r.completed_at ? dayLabel(r.completed_at) : undefined,
     posted: ago(r.posted_at),
-    /* Отклики, которых этот пользователь не видит (чужие), показываются только числом */
     otherProposals: r.other_proposals + Math.max(0, r.proposals_total - (visibleProposals[r.id] || 0)),
   };
 }

@@ -1,10 +1,5 @@
--- Taskly — схема базы данных (PostgreSQL).
--- Скрипт идемпотентный: его можно запускать при каждом старте сервера.
-
 CREATE SEQUENCE IF NOT EXISTS id_seq START 3000;
 
--- Пользователь. Один аккаунт может быть и заказчиком, и специалистом;
--- active_role — какой кабинет открыт сейчас.
 CREATE TABLE IF NOT EXISTS users (
   id            text PRIMARY KEY DEFAULT ('u-' || nextval('id_seq')),
   email         text NOT NULL UNIQUE,
@@ -12,11 +7,10 @@ CREATE TABLE IF NOT EXISTS users (
   name          text NOT NULL,
   active_role   text NOT NULL DEFAULT 'client' CHECK (active_role IN ('client', 'specialist')),
   is_demo       boolean NOT NULL DEFAULT false,
-  draft         jsonb,                                  -- черновик мастера создания проекта
+  draft         jsonb,
   created_at    timestamptz NOT NULL DEFAULT now()
 );
 
--- Профиль бизнеса (роль «заказчик»)
 CREATE TABLE IF NOT EXISTS business_profiles (
   user_id  text PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   company  text NOT NULL,
@@ -28,8 +22,6 @@ CREATE TABLE IF NOT EXISTS business_profiles (
   since    int NOT NULL DEFAULT EXTRACT(YEAR FROM now())::int
 );
 
--- Профиль специалиста. legacy — история до Taskly (импорт демо-данных),
--- остальные показатели считаются из проектов и отзывов.
 CREATE TABLE IF NOT EXISTS specialist_profiles (
   user_id       text PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   handle        text,
@@ -47,7 +39,6 @@ CREATE TABLE IF NOT EXISTS specialist_profiles (
   legacy        jsonb NOT NULL DEFAULT '{}'
 );
 
--- Проект = ТЗ + сделка. Статус меняется только через API сделки.
 CREATE TABLE IF NOT EXISTS projects (
   id              text PRIMARY KEY DEFAULT ('p-' || nextval('id_seq')),
   client_id       text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -59,7 +50,7 @@ CREATE TABLE IF NOT EXISTS projects (
   excludes        text[] NOT NULL DEFAULT '{}',
   materials       text[] NOT NULL DEFAULT '{}',
   requirements    text NOT NULL DEFAULT '',
-  price           int NOT NULL CHECK (price > 0),       -- бюджет из ТЗ, ₸
+  price           int NOT NULL CHECK (price > 0),
   days            int NOT NULL CHECK (days > 0),
   edits           int NOT NULL DEFAULT 1 CHECK (edits >= 0),
   edits_used      int NOT NULL DEFAULT 0,
@@ -71,11 +62,11 @@ CREATE TABLE IF NOT EXISTS projects (
   status          text NOT NULL DEFAULT 'searching'
                   CHECK (status IN ('published', 'searching', 'awaiting_payment', 'in_work', 'on_review', 'needs_fix', 'done', 'cancelled')),
   stage           int NOT NULL DEFAULT 0,
-  agreed_price    int,                                  -- условия после выбора исполнителя
+  agreed_price    int,
   agreed_days     int,
   due_date        date,
   paid            boolean NOT NULL DEFAULT false,
-  other_proposals int NOT NULL DEFAULT 0,               -- демо: отклики вне демо-таблицы
+  other_proposals int NOT NULL DEFAULT 0,
   review_by_client     boolean NOT NULL DEFAULT false,
   review_by_specialist boolean NOT NULL DEFAULT false,
   posted_at       timestamptz NOT NULL DEFAULT now(),
@@ -85,7 +76,6 @@ CREATE INDEX IF NOT EXISTS projects_client_idx ON projects (client_id);
 CREATE INDEX IF NOT EXISTS projects_specialist_idx ON projects (specialist_id);
 CREATE INDEX IF NOT EXISTS projects_status_idx ON projects (status);
 
--- Отклики специалистов
 CREATE TABLE IF NOT EXISTS proposals (
   id            text PRIMARY KEY DEFAULT ('pr-' || nextval('id_seq')),
   project_id    text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -99,11 +89,9 @@ CREATE TABLE IF NOT EXISTS proposals (
   read          boolean NOT NULL DEFAULT false,
   created_at    timestamptz NOT NULL DEFAULT now()
 );
--- Один активный отклик специалиста на проект
 CREATE UNIQUE INDEX IF NOT EXISTS proposals_one_active
   ON proposals (project_id, specialist_id) WHERE status IN ('sent', 'viewed', 'invited', 'accepted');
 
--- Резерв оплаты (демо-провайдер). Комиссия считается только на сервере.
 CREATE TABLE IF NOT EXISTS payments (
   id          text PRIMARY KEY DEFAULT ('pay-' || nextval('id_seq')),
   project_id  text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -116,7 +104,6 @@ CREATE TABLE IF NOT EXISTS payments (
   released_at timestamptz
 );
 
--- Переписка по проекту. sender — роль автора, system — сообщения платформы.
 CREATE TABLE IF NOT EXISTS messages (
   id         text PRIMARY KEY DEFAULT ('m-' || nextval('id_seq')),
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -128,7 +115,6 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 CREATE INDEX IF NOT EXISTS messages_project_idx ON messages (project_id, created_at);
 
--- Файлы проекта (пока только метаданные; хранилище — следующий этап)
 CREATE TABLE IF NOT EXISTS files (
   id         text PRIMARY KEY DEFAULT ('f-' || nextval('id_seq')),
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -140,7 +126,6 @@ CREATE TABLE IF NOT EXISTS files (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- Изменения задачи: предлагает одна сторона, решает другая
 CREATE TABLE IF NOT EXISTS change_requests (
   id          text PRIMARY KEY DEFAULT ('cr-' || nextval('id_seq')),
   project_id  text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -156,7 +141,6 @@ CREATE TABLE IF NOT EXISTS change_requests (
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
--- Отзывы: по одному от каждой стороны на проект
 CREATE TABLE IF NOT EXISTS reviews (
   id         text PRIMARY KEY DEFAULT ('r-' || nextval('id_seq')),
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
@@ -170,7 +154,6 @@ CREATE TABLE IF NOT EXISTS reviews (
   UNIQUE (project_id, from_role)
 );
 
--- Уведомления. link — куда ведёт клик, role — в каком кабинете показывать.
 CREATE TABLE IF NOT EXISTS notifications (
   id         text PRIMARY KEY DEFAULT ('n-' || nextval('id_seq')),
   user_id    text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -183,7 +166,6 @@ CREATE TABLE IF NOT EXISTS notifications (
 );
 CREATE INDEX IF NOT EXISTS notifications_user_idx ON notifications (user_id, created_at DESC);
 
--- Сохранённые проекты специалиста
 CREATE TABLE IF NOT EXISTS saved_projects (
   user_id    text NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,

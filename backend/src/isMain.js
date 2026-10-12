@@ -1,4 +1,3 @@
-/* true, если модуль запущен напрямую (node src/x.js), а не импортирован */
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 

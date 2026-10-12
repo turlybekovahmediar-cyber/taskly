@@ -1,6 +1,3 @@
-/* Форматирование и расчёты — одна точка правды для всего интерфейса. */
-
-/* Деньги храним целыми тенге. Комиссия Taskly — 5% со специалиста. */
 export const FEE = 0.05;
 export const commission = (price) => {
   const p = Math.max(0, Math.round(Number(price) || 0));
@@ -10,7 +7,6 @@ export const commission = (price) => {
 
 export const money = (n) => Math.round(Number(n) || 0).toLocaleString('ru-RU') + ' ₸';
 
-/* plural(5, ['отклик', 'отклика', 'откликов']) → 'откликов' */
 export function plural(n, [one, few, many]) {
   const a = Math.abs(n) % 100;
   const b = a % 10;
@@ -36,7 +32,6 @@ export const W = {
   stage: ['этап', 'этапа', 'этапов'],
 };
 
-/* Срок в днях → человекочитаемо: 7 → «1 неделя», 14 → «2 недели», 30 → «1 месяц». */
 export function daysLabel(days) {
   if (!days) return '—';
   if (days % 30 === 0) return pluralN(days / 30, ['месяц', 'месяца', 'месяцев']);
@@ -46,7 +41,6 @@ export function daysLabel(days) {
 
 export const editsLabel = (n) => (n ? pluralN(n, W.round) + ' правок' : 'Без правок');
 
-/* Даты ISO 'YYYY-MM-DD' читаем как локальные, а не как UTC. */
 export function parseDate(iso) {
   if (!iso) return null;
   const [y, m, d] = iso.split('-').map(Number);

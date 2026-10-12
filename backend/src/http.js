@@ -1,4 +1,3 @@
-/* Общие помощники для маршрутов: ошибки, проверка тела запроса, ответ со свежим состоянием. */
 import { query } from './db.js';
 import { USER_SQL } from './auth.js';
 import { buildState } from './state.js';
@@ -8,17 +7,14 @@ export class HttpError extends Error {
 }
 export const fail = (status, message) => { throw new HttpError(status, message); };
 
-/* Обёртка для async-обработчиков: ошибки уходят в общий обработчик */
 export const h = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
-/* Проверка тела запроса схемой zod. Возвращает очищенные данные или 400 с понятным текстом. */
 export function parse(schema, data) {
   const r = schema.safeParse(data ?? {});
   if (!r.success) fail(400, r.error.issues[0]?.message || 'Проверьте данные формы');
   return r.data;
 }
 
-/* Ответ после действия: актуальный снимок данных для текущего пользователя */
 export async function sendState(res, userId, extra = {}) {
   const user = userId ? (await query(USER_SQL, [userId])).rows[0] : null;
   res.json({ ...(await buildState(user)), ...extra });
