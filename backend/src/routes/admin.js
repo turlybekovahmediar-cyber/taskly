@@ -79,7 +79,7 @@ router.get('/admin/users', h(async (req, res) => {
   res.json({
     users: rows.map((u) => ({
       id: u.id, email: u.email, name: u.name, role: u.active_role, isAdmin: u.is_admin, isDemo: u.is_demo,
-      provider: u.auth_provider, blocked: !!u.blocked_at, created: stamp(u.created_at),
+      provider: u.auth_provider, blocked: !!u.blocked_at,
       lastLogin: u.last_login_at ? ago(u.last_login_at) : '—', projects: u.projects, proposals: u.proposals,
     })),
   });

@@ -121,7 +121,7 @@ function Users() {
               <span className="stack g1 grow" style={{ minWidth: 220 }}>
                 <span className="t-sm"><strong>{u.name}</strong> · {u.email}</span>
                 <span className="t-cap muted">
-                  {u.role === 'client' ? 'Бизнес' : 'Специалист'} · {u.provider === 'google' ? 'Google' : 'Email'} · регистрация {u.created} · вход {u.lastLogin} · проектов {u.projects}, откликов {u.proposals}
+                  {u.role === 'client' ? 'Бизнес' : 'Специалист'} · {u.provider === 'google' ? 'Google' : 'Email'} · вход {u.lastLogin} · проектов {u.projects}, откликов {u.proposals}
                 </span>
               </span>
               <span className="row g2">
