@@ -3,10 +3,9 @@ import { z } from 'zod';
 import { query, tx } from '../db.js';
 import { requireUser } from '../auth.js';
 import { h, parse, fail, sendState } from '../http.js';
-import { resetDemoData } from '../seed.js';
 
 const router = Router();
-router.use(['/me', '/notifications', '/demo'], requireUser);
+router.use(['/me', '/notifications'], requireUser);
 
 const str = (max) => z.string().trim().max(max);
 const list = (max, len = 80) => z.array(z.string().trim().min(1).max(len)).max(max);
@@ -72,10 +71,5 @@ router.post('/notifications/read-all', h(async (req, res) => {
   await sendState(res, req.user.id);
 }));
 
-router.post('/demo/reset', h(async (req, res) => {
-  if (!req.user.is_demo) fail(403, 'Сброс доступен только в демо-аккаунте');
-  await tx(resetDemoData);
-  await sendState(res, req.user.id);
-}));
 
 export default router;

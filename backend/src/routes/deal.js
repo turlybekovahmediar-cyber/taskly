@@ -4,6 +4,8 @@ import { tx } from '../db.js';
 import { requireUser } from '../auth.js';
 import { h, parse, fail, sendState, notify, systemMessage } from '../http.js';
 import { commission, money } from '../money.js';
+import { paypalEnabled } from '../config.js';
+import { startWork } from '../escrow.js';
 
 const router = Router();
 router.use(['/projects', '/proposals', '/changes'], requireUser);
@@ -200,13 +202,10 @@ router.post('/projects/:id/payment', h(async (req, res) => {
   await tx(async (db) => {
     const { p } = await lockAs(db, req.params.id, req.user, 'client');
     need(p.status === 'awaiting_payment' && p.specialist_id, 409, WRONG_STATUS);
+    need(!paypalEnabled(), 400, 'Оплата проходит через PayPal');
     const c = commission(priceOf(p));
-    await db.query(`INSERT INTO payments (project_id, amount, fee, payout) VALUES ($1, $2, $3, $4)`, [p.id, c.price, c.fee, c.payout]);
-    await db.query(`
-      UPDATE projects SET status = 'in_work', paid = true, stage = 0, due_date = current_date + $2::int WHERE id = $1`, [p.id, daysOf(p)]);
-    await systemMessage(db, p.id, 'Оплата зарезервирована до завершения проекта · ' + money(c.price));
-    await notify(db, p.specialist_id, 'specialist', workspace('specialist', p.id),
-      'Оплата по проекту «' + p.title + '» зарезервирована — можно начинать работу', 'payment');
+    await db.query(`INSERT INTO payments (project_id, amount, fee, payout, status, provider) VALUES ($1, $2, $3, $4, 'reserved', 'demo')`, [p.id, c.price, c.fee, c.payout]);
+    await startWork(db, p);
   });
   await sendState(res, req.user.id);
 }));

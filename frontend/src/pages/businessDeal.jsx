@@ -580,8 +580,15 @@ function PayModal({ p, onClose }) {
   const price = priceOf(p);
   const s = specialistById(p.specialistId);
   const c = commission(price);
-  const pay = () => {
+  const paypal = !!app.config.paypal;
+  const usd = Math.max(1, Math.round((price / (app.config.kztPerUsd || 500)) * 100) / 100).toFixed(2);
+  const pay = async () => {
     setStage('processing');
+    if (paypal) {
+      const r = await app.reservePayment(p.id);
+      if (r !== 'redirect') setStage('form');
+      return;
+    }
     setTimeout(() => { app.reservePayment(p.id); setStage('done'); }, 1200);
   };
   const close = stage === 'processing' ? undefined : onClose;
@@ -593,7 +600,7 @@ function PayModal({ p, onClose }) {
         ? <Btn variant="primary" onClick={() => app.navigate('/biz/workspace/' + p.id)}>Открыть рабочее пространство</Btn>
         : <><Btn onClick={onClose} disabled={stage === 'processing'}>Отмена</Btn>
           <Btn variant="primary" onClick={pay} disabled={stage === 'processing' || !understood}>
-            {stage === 'processing' ? <><span className="spin" /> Обрабатываем…</> : 'Зарезервировать ' + money(price)}
+            {stage === 'processing' ? <><span className="spin" /> {paypal ? 'Переходим в PayPal…' : 'Обрабатываем…'}</> : paypal ? 'Оплатить через PayPal · $' + usd : 'Зарезервировать ' + money(price)}
           </Btn></>}>
       {stage === 'done' ? (
         <div className="stack g4">
@@ -620,7 +627,12 @@ function PayModal({ p, onClose }) {
               <div className="kv-row kv-row--total"><dt>К оплате сейчас</dt><dd><Money value={price} strong /></dd></div>
             </div>
           </div>
-          <Field label="Способ оплаты">
+          {paypal ? (
+            <div className="card card--pad-sm stack g2" style={{ padding: 'var(--s4)' }}>
+              <strong className="t-sm">PayPal — банковская карта или аккаунт PayPal</strong>
+              <span className="t-cap muted">К оплате {'$' + usd} — это {money(price)} по курсу {app.config.kztPerUsd} ₸ за $1. Вы перейдёте на защищённую страницу PayPal: данные карты не попадают к нам.</span>
+            </div>
+          ) : <Field label="Способ оплаты">
             <div className="stack g3">
               {[['card', 'Банковская карта', 'Visa •••• 8842'], ['invoice', 'Счёт на компанию', 'Для юридических лиц, оплата по реквизитам']].map(([mid, t, s2]) => (
                 <label key={mid} className="card card--pad-sm" style={{ cursor: 'pointer', padding: 'var(--s4)' }}>
@@ -629,10 +641,10 @@ function PayModal({ p, onClose }) {
                 </label>
               ))}
             </div>
-          </Field>
+          </Field>}
           <label className="check"><input type="checkbox" checked={understood} onChange={(e) => setUnderstood(e.target.checked)} />
             <span><strong>Понимаю, как работает резервирование</strong>Оплата резервируется до завершения проекта и передаётся исполнителю после приёмки результата.</span></label>
-          <p className="t-cap muted">Демо: реального списания нет.</p>
+          {!paypal && <p className="t-cap muted">Демо-режим: реального списания нет.</p>}
         </div>
       )}
     </Modal>

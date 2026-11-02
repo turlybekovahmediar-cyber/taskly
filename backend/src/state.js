@@ -1,5 +1,6 @@
 import { query } from './db.js';
 import { ago, stamp, dayLabel, fileDay } from './time.js';
+import { captchaSiteKey, googleEnabled, paypalEnabled, kztPerUsd } from './config.js';
 
 const LEVEL_NAME = { new: 'Новый специалист', verified: 'Проверенный специалист', experienced: 'Опытный на Taskly' };
 const initials = (name) => (name || '').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase() || '—';
@@ -79,8 +80,10 @@ export async function buildState(user) {
   return {
     user: user ? {
       id: user.id, email: user.email, name: user.name, role: user.active_role, isDemo: user.is_demo,
+      isAdmin: user.is_admin, provider: user.auth_provider, hasPassword: user.has_password,
       company: user.company, business: user.has_business ? { company: user.company, sphere: user.sphere, city: user.city, site: user.site, about: user.about } : null, hasBusiness: user.has_business, hasSpecialist: user.has_specialist,
     } : null,
+    config: { recaptchaSiteKey: captchaSiteKey(), google: googleEnabled(), paypal: paypalEnabled(), kztPerUsd: kztPerUsd() },
     draft: user?.draft ?? null,
     savedProjects: saved.rows.map((r) => r.project_id),
     specialists: specialists.rows.map((r) => serializeSpecialist(r, r.id === me)),

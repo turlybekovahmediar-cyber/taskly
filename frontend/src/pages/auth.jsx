@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icon, useApp, Btn, Link, Field, Ph } from '../components/ui.jsx';
 import { directions, skillsByDirection, spheres } from '../data/mock.js';
 import { parseRoute } from '../lib/router.js';
 import { shortName } from '../lib/format.js';
 import { useSoon } from '../components/ui.jsx';
+import { captchaToken, preloadCaptcha } from '../lib/captcha.js';
+import { PASSWORD_RULE, passwordProblem } from './meta.jsx';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -19,6 +21,26 @@ function AuthLayout({ side, children, title, sub }) {
         <div className="card card--pad-lg stack g5">{children}</div>
       </div>
     </main>
+  );
+}
+
+const OAUTH_ERRORS = {
+  google: 'Не удалось войти через Google. Попробуйте ещё раз или войдите по email.',
+  google_off: 'Вход через Google пока не настроен.',
+  blocked: 'Аккаунт заблокирован. Напишите в поддержку.',
+};
+
+function GoogleButton({ role, label }) {
+  const app = useApp();
+  if (!app.config.google) return null;
+  return (
+    <>
+      <a className="btn btn--lg btn--full" href={'/api/auth/google?role=' + role} style={{ gap: 'var(--s3)' }}>
+        <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        {label}
+      </a>
+      <div className="row g3" style={{ alignItems: 'center' }}><div className="grow" style={{ height: 1, background: 'var(--line)' }} /><span className="t-cap muted">или</span><div className="grow" style={{ height: 1, background: 'var(--line)' }} /></div>
+    </>
   );
 }
 
@@ -46,6 +68,8 @@ function SignIn() {
   const [err, setErr] = useState({});
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const oauthError = OAUTH_ERRORS[parseRoute(app.route).params.get('error')];
+  useEffect(() => { preloadCaptcha(app.config.recaptchaSiteKey); }, [app.config.recaptchaSiteKey]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -57,7 +81,7 @@ function SignIn() {
     if (Object.keys(errs).length) return;
     setBusy(true);
     try {
-      const res = await app.login({ email: v, password, role });
+      const res = await app.login({ email: v, password, role, captchaToken: await captchaToken(app.config.recaptchaSiteKey, 'login') });
       const r = res.user.role;
       app.navigate(r === 'client' ? '/biz' : '/spec');
       app.toast('Здравствуйте, ' + (r === 'client' ? res.user.business?.company || res.user.name : shortName(res.user.name)));
@@ -66,23 +90,23 @@ function SignIn() {
       setBusy(false);
     }
   };
-  const demo = async (r) => { await app.setRole(r); app.navigate(r === 'client' ? '/biz' : '/spec'); };
 
   return (
     <AuthLayout title="Вход в Taskly" sub="Войдите, чтобы продолжить работу с проектами, откликами и сообщениями."
       side={
         <div className="stack g4">
           <div className="card card--pad-sm stack g3">
-            <span className="t-micro muted">Быстрый вход в демо-аккаунты</span>
-            <button type="button" className="menu-item" disabled={app.pending} onClick={() => demo('client')}><Icon name="briefcase" size={16} />Кабинет бизнеса · Barber Loft</button>
-            <button type="button" className="menu-item" disabled={app.pending} onClick={() => demo('specialist')}><Icon name="user" size={16} />Кабинет специалиста · Аружан С.</button>
+            <span className="t-micro muted">Один аккаунт — две роли</span>
+            <span className="menu-item" style={{ cursor: 'default' }}><Icon name="briefcase" size={16} />Размещайте задачи как бизнес</span>
+            <span className="menu-item" style={{ cursor: 'default' }}><Icon name="user" size={16} />Выполняйте проекты как специалист</span>
           </div>
-          <div className="note"><Icon name="info" size={16} /><span className="grow">Демо-аккаунты — общие для всех, кто смотрит продукт. Чтобы работать со своими проектами, зарегистрируйтесь.</span></div>
+          <div className="note"><Icon name="shield" size={16} /><span className="grow">Оплата резервируется до приёмки работы — исполнитель получает деньги только за принятый результат.</span></div>
         </div>
       }>
       <form className="stack g5" onSubmit={submit} noValidate>
         <RoleToggle value={role} onChange={setRole} />
-        {err.form && <div className="note note--stop" role="alert"><Icon name="alert" size={16} /><span className="grow">{err.form}</span></div>}
+        {(err.form || oauthError) && <div className="note note--stop" role="alert"><Icon name="alert" size={16} /><span className="grow">{err.form || oauthError}</span></div>}
+        <GoogleButton role={role} label="Войти через Google" />
         <Field label="Email" id="si-email" required error={err.email}>
           <input className="input" id="si-email" type="email" autoComplete="email" placeholder="name@company.kz" value={email} onChange={(e) => setEmail(e.target.value)} data-invalid={!!err.email} />
         </Field>
@@ -110,6 +134,7 @@ function SignUp() {
   const [password, setPassword] = useState('');
   const [err, setErr] = useState({});
   const [busy, setBusy] = useState(false);
+  useEffect(() => { preloadCaptcha(app.config.recaptchaSiteKey); }, [app.config.recaptchaSiteKey]);
 
   const next = async () => {
     const e = {};
@@ -118,15 +143,14 @@ function SignUp() {
       if (!EMAIL_RE.test(email.trim())) e.email = 'Введите корректный email, например name@company.kz';
     }
     if (step === 2) {
-      if (password.length < 8) e.password = 'Минимум 8 символов';
-      else if (!/\d/.test(password) || !/[a-zа-яё]/i.test(password)) e.password = 'Нужны и буквы, и цифры';
+      if (passwordProblem(password)) e.password = PASSWORD_RULE;
     }
     setErr(e);
     if (Object.keys(e).length) return;
     if (step < 2) { setStep(step + 1); return; }
     setBusy(true);
     try {
-      await app.register({ role, name: name.trim(), email: email.trim(), password });
+      await app.register({ role, name: name.trim(), email: email.trim(), password, captchaToken: await captchaToken(app.config.recaptchaSiteKey, 'register') });
       app.navigate(role === 'client' ? '/onboarding/business' : '/onboarding/specialist');
       app.toast('Аккаунт создан');
     } catch (ex) {
@@ -167,6 +191,7 @@ function SignUp() {
         {step === 1 ? (
           <>
             <RoleToggle value={role} onChange={setRole} />
+            <GoogleButton role={role} label="Зарегистрироваться через Google" />
             <Field label={role === 'client' ? 'Название компании' : 'Имя и фамилия'} required error={err.name} id="su-name">
               <input className="input" id="su-name" value={name} onChange={(e) => setName(e.target.value)}
                 placeholder={role === 'client' ? 'Например, Barber Loft' : 'Например, Аружан Смагулова'} data-invalid={!!err.name} />
@@ -179,7 +204,7 @@ function SignUp() {
         ) : (
           <>
             {err.form && <div className="note note--stop" role="alert"><Icon name="alert" size={16} /><span className="grow">{err.form}</span></div>}
-            <Field label="Пароль" required hint="Минимум 8 символов, буквы и цифры" error={err.password} id="su-pass">
+            <Field label="Пароль" required hint={PASSWORD_RULE} error={err.password} id="su-pass">
               <input className="input" id="su-pass" type="password" autoComplete="new-password" value={password}
                 onChange={(e) => setPassword(e.target.value)} data-invalid={!!err.password} />
             </Field>

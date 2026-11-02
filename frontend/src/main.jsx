@@ -12,6 +12,7 @@ import { BizDashboard, BizProjects, BizNewProject, BizTzPreview, BizProjectPubli
 import { BizProposals, BizSpecialistProfile, BizSpecialists, BizSelectStep, BizHistory, BizProfile, BizMessages } from './pages/businessDeal.jsx';
 import { Workspace } from './pages/workspace.jsx';
 import { SpecDashboard, SpecProjects, SpecProjectDetail, SpecApply, SpecProposals, SpecMessages, SpecPayout, SpecReviews, SpecHistory, SpecProfile, SpecProfileEdit } from './pages/specialist.jsx';
+import { AdminPage } from './pages/admin.jsx';
 import { HowPage, SecurityPage, PricingPage, FaqPage, SupportPage, NotificationsPage, SettingsPage, LegalPage, UiKitPage, MapPage } from './pages/meta.jsx';
 
 class PageBoundary extends React.Component {
@@ -60,13 +61,13 @@ function Gate({ need, children }) {
         <Empty icon="lock"
           title={app.role === 'guest' ? 'Войдите, чтобы открыть этот раздел' : 'Этот раздел — кабинет ' + ROLE_NAME[need]}
           text={app.role === 'guest'
-            ? 'Раздел доступен после входа. Можно войти в свой аккаунт или в демо-аккаунт, чтобы посмотреть продукт.'
+            ? 'Раздел доступен после входа в аккаунт.'
             : 'Сейчас открыт кабинет ' + ROLE_NAME[app.role] + '. Один аккаунт может быть и заказчиком, и специалистом — переключитесь, чтобы открыть этот раздел.'}
           action={app.role === 'guest'
             ? <Btn variant="primary" onClick={() => app.navigate('/signin')}>Войти</Btn>
             : <Btn variant="primary" icon="swap" onClick={() => app.setRole(target)}>Переключиться на {target === 'client' ? 'бизнес' : 'специалиста'}</Btn>}
           secondary={app.role === 'guest'
-            ? <Btn variant="ghost" onClick={() => app.setRole(target)}>Демо-вход как {target === 'client' ? 'бизнес' : 'специалист'}</Btn>
+            ? <Btn variant="ghost" onClick={() => app.navigate('/signup?role=' + target)}>Регистрация</Btn>
             : <Btn variant="ghost" onClick={() => app.navigate('/')}>На главную</Btn>} />
       </div>
     </main>
@@ -113,6 +114,7 @@ function Router() {
   if (PUBLIC[path]) { const P = PUBLIC[path]; return <P />; }
   if (CLIENT[path]) { const P = CLIENT[path]; return <Gate need="client"><P /></Gate>; }
   if (SPECIALIST[path]) { const P = SPECIALIST[path]; return <Gate need="specialist"><P /></Gate>; }
+  if (path === '/admin') return <Gate need="any">{app.user?.isAdmin ? <AdminPage /> : <NotFound />}</Gate>;
   if (ACCOUNT[path]) { const P = ACCOUNT[path]; return <Gate need="any"><P /></Gate>; }
   return <NotFound />;
 }

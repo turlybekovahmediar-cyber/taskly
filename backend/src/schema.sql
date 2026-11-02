@@ -171,3 +171,30 @@ CREATE TABLE IF NOT EXISTS saved_projects (
   project_id text NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
   PRIMARY KEY (user_id, project_id)
 );
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin boolean NOT NULL DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider text NOT NULL DEFAULT 'password';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS google_sub text UNIQUE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version int NOT NULL DEFAULT 0;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS blocked_at timestamptz;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at timestamptz;
+
+CREATE TABLE IF NOT EXISTS security_events (
+  id         bigserial PRIMARY KEY,
+  user_id    text REFERENCES users(id) ON DELETE SET NULL,
+  event      text NOT NULL,
+  ip         text,
+  details    jsonb NOT NULL DEFAULT '{}',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS security_events_created_idx ON security_events (created_at DESC);
+
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS provider_order_id text UNIQUE;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS capture_id text;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS approve_url text;
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS amount_usd numeric(12, 2);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS updated_at timestamptz NOT NULL DEFAULT now();
+ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_status_check;
+ALTER TABLE payments ADD CONSTRAINT payments_status_check
+  CHECK (status IN ('pending', 'reserved', 'released', 'refunded', 'failed', 'cancelled'));
+CREATE INDEX IF NOT EXISTS payments_project_idx ON payments (project_id);

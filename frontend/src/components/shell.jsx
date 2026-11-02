@@ -94,13 +94,18 @@ function Header() {
                 <button type="button" className="menu-item" onClick={() => app.navigate('/support')}>
                   <Icon name="help" size={16} />Поддержка
                 </button>
+                {app.user?.isAdmin && (
+                  <button type="button" className="menu-item" onClick={() => app.navigate('/admin')}>
+                    <Icon name="shield" size={16} />Админка
+                  </button>
+                )}
                 <div className="menu-sep" />
                 <button type="button" className="menu-item" onClick={logout}>
                   <Icon name="logout" size={16} />Выйти
                 </button>
-                <div className="menu-label">Демо-доступ</div>
+                <div className="menu-label">Кабинет</div>
                 <button type="button" className="menu-item" onClick={switchRole}>
-                  <Icon name="swap" size={16} />Сменить роль на {role === 'client' ? 'специалиста' : 'бизнес'}
+                  <Icon name="swap" size={16} />Перейти в кабинет {role === 'client' ? 'специалиста' : 'бизнеса'}
                 </button>
               </Dropdown>
             </>
@@ -290,7 +295,7 @@ function DemoPanel() {
         <button type="button" className="btn btn--icon btn--sm" onClick={() => setOpen(false)} aria-label="Скрыть панель"><Icon name="x" size={15} /></button>
       </div>
       <div className="float-body">
-        {row('Роль в демо', (
+        {row('Кабинет', (
           <select className="select" value={app.role} onChange={(e) => {
             const r = e.target.value;
             go(r, r === 'client' ? '/biz' : r === 'specialist' ? '/spec' : '/');
@@ -329,7 +334,7 @@ function DemoPanel() {
           <button type="button" className="menu-item" onClick={() => go('specialist', '/spec')}><Icon name="user" size={15} />Путь специалиста</button>
           <button type="button" className="menu-item" onClick={() => app.navigate('/ui-kit')}><Icon name="grid" size={15} />UI-kit</button>
           <button type="button" className="menu-item" onClick={() => app.navigate('/map')}><Icon name="layers" size={15} />Карта продукта и флоу</button>
-          <button type="button" className="menu-item" onClick={async () => { if (await app.resetDemo()) app.toast('Демо-данные восстановлены'); }} disabled={!app.user?.isDemo} title={app.user?.isDemo ? undefined : 'Доступно в демо-аккаунте'}><Icon name="trash" size={15} />Сбросить демо-данные</button>
+          {app.user?.isAdmin && <button type="button" className="menu-item" onClick={async () => { if (await app.resetDemo()) app.toast('Демо-данные восстановлены'); }}><Icon name="trash" size={15} />Сбросить демо-данные</button>}
         </div>
         <p className="float-note">Данные хранятся на сервере. Настройки вида — только в этом браузере.</p>
       </div>

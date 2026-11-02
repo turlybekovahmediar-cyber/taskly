@@ -52,6 +52,7 @@ export const statuses = {
   on_review: { label: 'На проверке', tone: 'warn' },
   needs_fix: { label: 'Нужна правка', tone: 'stop' },
   done: { label: 'Завершён', tone: 'ok' },
+  cancelled: { label: 'Отменён, оплата возвращена', tone: 'stop' },
 };
 export const OPEN_STATUSES = ['published', 'searching'];
 export const ACTIVE_STATUSES = ['awaiting_payment', 'in_work', 'on_review', 'needs_fix'];

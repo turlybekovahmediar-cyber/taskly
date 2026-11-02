@@ -114,7 +114,7 @@ export function AppProvider({ children }) {
       setRole: (role) => auth(async () => {
         const u = user();
         if (role === 'guest') { if (u) await call('POST', '/auth/logout', undefined, { withDraft: true }); return; }
-        if (!u) { await call('POST', '/auth/demo', { role }, { withDraft: true }); return; }
+        if (!u) { navigate('/signin'); return; }
         if (u.role !== role) await call('PATCH', '/auth/me', { role }, { withDraft: true });
       }),
       login: (body) => auth(() => request('POST', '/auth/login', body, { withDraft: true })),
@@ -131,7 +131,12 @@ export function AppProvider({ children }) {
         setData((d) => ({ ...d, savedProjects: on ? d.savedProjects.filter((x) => x !== id) : [...d.savedProjects, id] }));
         return call(on ? 'DELETE' : 'PUT', '/me/saved/' + id);
       },
-      resetDemo: () => call('POST', '/demo/reset'),
+      resetDemo: async () => {
+        try { await api('POST', '/admin/demo/reset', {}); await refresh(); return true; }
+        catch (e) { toast(e.message, 'err'); return false; }
+      },
+      changePassword: (body) => call('POST', '/auth/password', body),
+      logoutAll: () => call('POST', '/auth/logout-all', undefined, { withDraft: true }),
 
       saveDraft: (d) => {
         setDraft(d);
@@ -153,7 +158,14 @@ export function AppProvider({ children }) {
       inviteSpecialist: (projectId, specialistId, message) => call('POST', '/projects/' + projectId + '/invite', { specialistId, message }),
 
       selectProposal: (proposalId) => call('POST', '/projects/' + projectOfProposal(proposalId) + '/select', { proposalId }),
-      reservePayment: (projectId) => call('POST', '/projects/' + projectId + '/payment'),
+      reservePayment: async (projectId) => {
+        if (!dataRef.current?.config?.paypal) return call('POST', '/projects/' + projectId + '/payment');
+        try {
+          const { url } = await api('POST', '/projects/' + projectId + '/checkout', {});
+          window.location.assign(url);
+          return 'redirect';
+        } catch (e) { toast(e.message, 'err'); return null; }
+      },
       completeStage: (projectId) => call('POST', '/projects/' + projectId + '/stages/complete'),
       deliver: (projectId, { comment, files = [] }) => call('POST', '/projects/' + projectId + '/deliver', { comment, files }),
       requestFix: (projectId, text) => call('POST', '/projects/' + projectId + '/request-fix', { text }),
@@ -168,7 +180,7 @@ export function AppProvider({ children }) {
       readNotification: (id) => call('POST', '/notifications/' + id + '/read'),
       readAllNotifications: (role) => call('POST', '/notifications/read-all', { role }),
     };
-  }, [call, request]);
+  }, [call, request, refresh, toast]);
 
   const user = data?.user || null;
   specIndex = new Map((data?.specialists || []).map((s) => [s.id, s]));
@@ -177,6 +189,7 @@ export function AppProvider({ children }) {
   const value = useMemo(() => ({
     ...actions,
     ready: !!data, offline: data?.offline || null, pending, user,
+    config: data?.config || {},
     role: user ? user.role : 'guest',
     bizName: user?.business?.company || user?.name || '',
     business: user?.business || null,

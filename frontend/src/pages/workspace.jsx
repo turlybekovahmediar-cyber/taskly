@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Icon, useApp, Btn, Link, Field, Tag, Badge, StatusPill, Avatar, Modal, Empty, Money, PayoutRows, SafeNote, Rail, Metric, Tabs, Stars, Dropdown, useSoon, commission } from '../components/ui.jsx';
 import { AppShell } from '../components/shell.jsx';
 import { ChatThread, useParties } from '../components/chat.jsx';
@@ -25,6 +25,13 @@ function Workspace({ id, section = 'overview' }) {
   const p = projectById(app.entities, id);
   const hasAccess = p && (role === 'client' ? p.mine : p.specialistId === app.me.id);
   const [modal, setModal] = useState(() => (parseRoute(app.route).params.get('review') === '1' ? 'review' : null));
+  useEffect(() => {
+    const result = parseRoute(app.route).params.get('payment');
+    if (!result) return;
+    const text = { success: ['Оплата прошла — деньги зарезервированы до приёмки работы', undefined], failed: ['Оплата не прошла. Попробуйте ещё раз или другой картой', 'err'], cancelled: ['Оплата отменена', undefined] }[result];
+    if (text) app.toast(text[0], text[1]);
+    app.navigate(app.route.split('?')[0], { replace: true });
+  }, []);
   const base = role === 'client' ? '/biz/workspace/' : '/spec/workspace/';
   const listUrl = role === 'client' ? '/biz/projects' : '/spec';
   const { other, otherRole } = useParties(p);
@@ -96,7 +103,9 @@ function Workspace({ id, section = 'overview' }) {
               </Dropdown>
             </div>
           </div>
-          <SafeNote amount={priceOf(p)} paid={p.paid} compact />
+          {p.status === 'cancelled'
+            ? <div className="note note--stop"><Icon name="info" size={16} /><span className="grow">Проект отменён. Оплата {money(priceOf(p))} возвращена заказчику.</span></div>
+            : <SafeNote amount={priceOf(p)} paid={p.paid} compact />}
         </div>
       </div>
 
@@ -143,6 +152,7 @@ function statusText(p, role) {
       ? 'Результат отправлен на проверку. Проверьте файлы и примите работу или запросите правку.'
       : 'Результат на проверке у заказчика. Обычно ответ приходит в течение дня; напоминание уйдёт автоматически.';
     case 'done': return 'Проект завершён. Выплата оформлена, обе стороны могут оставить отзыв.';
+    case 'cancelled': return 'Проект отменён администратором, оплата возвращена заказчику. Если это ошибка — напишите в поддержку.';
     default: return '';
   }
 }
@@ -224,7 +234,7 @@ function WsOverview({ p, role, base, open }) {
             <div className="kv-row"><dt>Стоимость</dt><dd><Money value={priceOf(p)} strong /></dd></div>
             <div className="kv-row"><dt>Срок</dt><dd>{daysLabel(daysOf(p))}</dd></div>
             <div className="kv-row"><dt>Правки</dt><dd>{p.edits ? 'Осталось ' + Math.max(p.edits - p.editsUsed, 0) + ' из ' + p.edits : 'Без правок'}</dd></div>
-            <div className="kv-row"><dt>Статус оплаты</dt><dd>{p.paid ? <Badge tone="ok" dot>{p.status === 'done' ? 'Выплачена' : 'Зарезервирована'}</Badge> : <Badge tone="warn" dot>Не зарезервирована</Badge>}</dd></div>
+            <div className="kv-row"><dt>Статус оплаты</dt><dd>{p.status === 'cancelled' ? <Badge tone="stop" dot>Возвращена</Badge> : p.paid ? <Badge tone="ok" dot>{p.status === 'done' ? 'Выплачена' : 'Зарезервирована'}</Badge> : <Badge tone="warn" dot>Не зарезервирована</Badge>}</dd></div>
           </div>
           {role === 'specialist' && (
             <>

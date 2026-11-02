@@ -587,6 +587,69 @@ function NotificationsPage() {
   );
 }
 
+export const PASSWORD_RULE = 'Минимум 8 символов, заглавная и строчная буква и цифра';
+export const passwordProblem = (p) => (p.length < 8 || !/[a-zа-яё]/.test(p) || !/[A-ZА-ЯЁ]/.test(p) || !/\d/.test(p) ? PASSWORD_RULE : '');
+
+function SecurityCard() {
+  const app = useApp();
+  const u = app.user;
+  const [f, setF] = useState({ current: '', next: '', repeat: '' });
+  const [err, setErr] = useState({});
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setF((x) => ({ ...x, [k]: e.target.value }));
+  if (!u) return null;
+  const demo = u.isDemo;
+
+  const save = async () => {
+    const e = {};
+    if (u.hasPassword && !f.current) e.current = 'Введите текущий пароль';
+    if (passwordProblem(f.next)) e.next = PASSWORD_RULE;
+    else if (f.next !== f.repeat) e.repeat = 'Пароли не совпадают';
+    setErr(e);
+    if (Object.keys(e).length) return;
+    setBusy(true);
+    const ok = await app.changePassword({ current: f.current || undefined, next: f.next });
+    setBusy(false);
+    if (ok) { setF({ current: '', next: '', repeat: '' }); app.toast('Пароль изменён. На других устройствах нужно войти заново.'); }
+  };
+
+  return (
+    <>
+      <div className="card card--pad-lg stack g6">
+        <h3 className="t-h4">{u.hasPassword ? 'Сменить пароль' : 'Задать пароль'}</h3>
+        <p className="t-sm muted">
+          {u.provider === 'google' ? 'Вы входите через Google. Можно дополнительно задать пароль для входа по email.' : 'Пароль хранится только в виде хеша — его не видит даже администратор.'}
+        </p>
+        {demo ? (
+          <div className="note"><Icon name="info" size={16} /><span className="grow">В демо-аккаунте пароль менять нельзя — он общий для всех, кто смотрит продукт.</span></div>
+        ) : (
+          <>
+            <div className="grid-2" style={{ gap: 'var(--s5)' }}>
+              {u.hasPassword && (
+                <Field label="Текущий пароль" id="sp-cur" error={err.current}>
+                  <input id="sp-cur" className="input" type="password" autoComplete="current-password" value={f.current} onChange={set('current')} data-invalid={!!err.current} />
+                </Field>
+              )}
+              <Field label="Новый пароль" id="sp-new" hint={PASSWORD_RULE} error={err.next}>
+                <input id="sp-new" className="input" type="password" autoComplete="new-password" value={f.next} onChange={set('next')} data-invalid={!!err.next} />
+              </Field>
+              <Field label="Повторите пароль" id="sp-rep" error={err.repeat}>
+                <input id="sp-rep" className="input" type="password" autoComplete="new-password" value={f.repeat} onChange={set('repeat')} data-invalid={!!err.repeat} />
+              </Field>
+            </div>
+            <div><Btn variant="primary" icon="lock" disabled={busy} onClick={save}>{busy ? 'Сохраняем…' : 'Сохранить пароль'}</Btn></div>
+          </>
+        )}
+      </div>
+      <div className="card card--pad-lg stack g4">
+        <h3 className="t-h4">Сеансы</h3>
+        <p className="t-sm muted">Если вы входили с чужого компьютера или потеряли телефон — завершите все сеансы. Войти придётся заново на всех устройствах, включая это.</p>
+        <div><Btn variant="danger" icon="logout" disabled={demo} onClick={async () => { if (await app.logoutAll()) { app.navigate('/signin'); app.toast('Все сеансы завершены'); } }}>Выйти на всех устройствах</Btn></div>
+      </div>
+    </>
+  );
+}
+
 function SettingsPage() {
   const app = useApp();
   const initialTab = parseRoute(app.route).params.get('tab');
@@ -607,7 +670,7 @@ function SettingsPage() {
                 </button>
               ))}
             </div>
-            <p className="t-cap muted">Один аккаунт может быть и заказчиком, и специалистом. В демо-аккаунтах переключение открывает второй демо-аккаунт, чтобы пройти сделку с обеих сторон.</p>
+            <p className="t-cap muted">Один аккаунт может быть и заказчиком, и специалистом — переключайтесь, не выходя из аккаунта.</p>
           </div>
           <div className="card card--pad-lg stack g3">
             <h3 className="t-h4">Защита сделки</h3>
@@ -733,27 +796,7 @@ function SettingsPage() {
 
           {tab === 'security' && (
             <>
-              <div className="card card--pad-lg stack g6">
-                <h3 className="t-h4">Вход и защита</h3>
-                <div className="grid-2" style={{ gap: 'var(--s5)' }}>
-                  <Field label="Пароль" hint="Обновляйте раз в полгода"><Btn icon="lock" onClick={() => app.toast('Смена пароля появится после подключения сервера')}>Изменить пароль</Btn></Field>
-                  <Field label="Двухэтапная проверка" hint="Код в SMS при входе с нового устройства">
-                    <label className="switch"><input type="checkbox" /><span className="t-sm">Включить</span></label>
-                  </Field>
-                </div>
-              </div>
-              <div className="card card--pad-lg stack g4">
-                <h3 className="t-h4">Где вы вошли</h3>
-                <div className="rows">
-                  {[['Chrome · macOS', 'Алматы · сейчас', true], ['Safari · iPhone', 'Алматы · 3 дня назад', false]].map(([d, w, cur]) => (
-                    <div className="row-item" key={d} style={{ cursor: 'default' }}>
-                      <span className="avatar"><Icon name="user" size={16} /></span>
-                      <span className="stack g1 grow"><span className="t-sm">{d}</span><span className="t-cap muted">{w}</span></span>
-                      {cur ? <Badge tone="ok" dot>Текущая сессия</Badge> : <Btn size="sm" variant="ghost" onClick={() => app.toast('Сеанс завершён')}>Завершить</Btn>}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <SecurityCard />
               <div className="card card--pad-lg stack g4">
                 <h3 className="t-h4">Документы</h3>
                 <Link to="/terms" className="menu-item"><Icon name="book" size={16} />Условия использования</Link>
