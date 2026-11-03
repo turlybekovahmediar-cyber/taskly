@@ -5,7 +5,7 @@ import { requireAdmin } from '../auth.js';
 import { h, parse, fail } from '../http.js';
 import { securityEvent } from '../log.js';
 import { resetDemoData } from '../seed.js';
-import { ago, stamp } from '../time.js';
+import { stamp } from '../time.js';
 import { refundCapture } from '../paypal.js';
 import { refundInDb } from './payments.js';
 
@@ -70,7 +70,7 @@ router.get('/admin/overview', h(async (req, res) => {
 router.get('/admin/users', h(async (req, res) => {
   const q = String(req.query.q || '').trim().toLowerCase().slice(0, 80);
   const { rows } = await query(`
-    SELECT u.id, u.email, u.name, u.active_role, u.is_admin, u.is_demo, u.auth_provider, u.blocked_at, u.created_at, u.last_login_at,
+    SELECT u.id, u.email, u.name, u.active_role, u.is_admin, u.is_demo, u.auth_provider, u.blocked_at,
       (SELECT count(*) FROM projects p WHERE p.client_id = u.id)::int AS projects,
       (SELECT count(*) FROM proposals x WHERE x.specialist_id = u.id)::int AS proposals
     FROM users u
@@ -80,7 +80,7 @@ router.get('/admin/users', h(async (req, res) => {
     users: rows.map((u) => ({
       id: u.id, email: u.email, name: u.name, role: u.active_role, isAdmin: u.is_admin, isDemo: u.is_demo,
       provider: u.auth_provider, blocked: !!u.blocked_at,
-      lastLogin: u.last_login_at ? ago(u.last_login_at) : '—', projects: u.projects, proposals: u.proposals,
+      projects: u.projects, proposals: u.proposals,
     })),
   });
 }));
