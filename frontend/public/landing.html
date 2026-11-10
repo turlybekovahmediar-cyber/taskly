@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Taskly для бизнеса</title>
+<meta name="description" content="Найдите исполнителя для задачи за 3 минуты и платите только за принятый результат.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/onest-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/onest-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/onest-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('/fonts/onest-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --ink: #16181d;
+  --muted: #5b616d;
+  --line: #e3e6ec;
+  --accent: #d9461f;
+  --accent-ink: #ffffff;
+  --accent-soft: #fbe9e3;
+  --ok: #1f6b45;
+  --ok-soft: #e1f2e8;
+  --info: #1e55a3;
+  --info-soft: #e2ebf8;
+  --promo: #f2c14e;
+  --promo-ink: #16181d;
+  --shadow: 0 18px 48px rgba(22, 24, 29, 0.10);
+  --font: 'Onest', 'Segoe UI', Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --surface: #1a1d23; --ink: #eef0f4; --muted: #a3a9b5; --line: #2c3039;
+    --accent: #f06a43; --accent-ink: #16181d; --accent-soft: #3a2119;
+    --ok: #7fd3a4; --ok-soft: #1d3428; --info: #8fb6f0; --info-soft: #1d2a3d;
+    --promo: #f2c14e; --promo-ink: #16181d; --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --surface: #1a1d23; --ink: #eef0f4; --muted: #a3a9b5; --line: #2c3039;
+  --accent: #f06a43; --accent-ink: #16181d; --accent-soft: #3a2119;
+  --ok: #7fd3a4; --ok-soft: #1d3428; --info: #8fb6f0; --info-soft: #1d2a3d;
+  --promo: #f2c14e; --promo-ink: #16181d; --shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1120px; margin: 0 auto; }
+a { color: inherit; }
+a:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 12px; }
+
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 22px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; text-decoration: none; }
+.logo-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--ink); color: var(--bg); display: grid; place-items: center; font-size: 16px; }
+.top-link { font-weight: 500; color: var(--muted); text-decoration: none; font-size: 15px; }
+.top-link:hover { color: var(--ink); }
+
+.hero { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 56px; align-items: center; padding-block: 36px 64px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: clamp(36px, 5.2vw, 62px); line-height: 1.04; letter-spacing: -0.02em; font-weight: 700; margin: 14px 0 20px; text-wrap: balance; }
+.lead { font-size: 19px; color: var(--muted); max-width: 34em; margin: 0 0 30px; }
+.cta-row { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px; background: var(--accent); color: var(--accent-ink);
+  font-weight: 700; font-size: 18px; text-decoration: none; padding: 16px 28px; border-radius: 999px;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(217, 70, 31, 0.28); }
+.btn svg { width: 18px; height: 18px; }
+.note { font-size: 14px; color: var(--muted); }
+
+.side { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.promo { background: var(--promo); color: var(--promo-ink); border-radius: 18px; padding: 18px 22px; transform: rotate(-1.5deg); box-shadow: var(--shadow); }
+.promo b { display: block; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 4px; }
+.promo p { margin: 0; font-weight: 700; font-size: 17px; line-height: 1.35; }
+.task { background: var(--surface); border: 1px solid var(--line); border-radius: 24px; padding: 28px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 18px; }
+.pill { align-self: flex-start; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 999px; background: var(--info-soft); color: var(--info); }
+.task h3 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 700; }
+.facts { display: flex; gap: 32px; flex-wrap: wrap; }
+.facts span { display: block; font-size: 13px; color: var(--muted); }
+.facts strong { font-size: 20px; font-variant-numeric: tabular-nums; }
+.bids { display: flex; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding-top: 18px; flex-wrap: wrap; }
+.faces { display: flex; }
+.faces i { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 700; font-size: 13px; border: 2px solid var(--surface); margin-left: -8px; color: #16181d; }
+.faces i:first-child { margin-left: 0; }
+.safe { margin: 0; font-size: 15px; font-weight: 700; background: var(--ok-soft); color: var(--ok); border-radius: 14px; padding: 12px 16px; }
+
+section.block { padding-block: 56px; border-top: 1px solid var(--line); }
+h2 { font-size: clamp(26px, 3.4vw, 36px); line-height: 1.15; margin: 0 0 28px; letter-spacing: -0.01em; text-wrap: balance; }
+.benefits { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.benefit { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; padding: 26px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.benefit .ico { width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; }
+.benefit .ico svg { width: 22px; height: 22px; }
+.benefit h3 { margin: 6px 0 0; font-size: 20px; line-height: 1.25; }
+.benefit p { margin: 0; color: var(--muted); }
+
+.steps { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; counter-reset: step; list-style: none; padding: 0; margin: 0; }
+.steps li { counter-increment: step; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.steps li::before { content: counter(step); width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--accent); color: var(--accent); font-weight: 700; display: grid; place-items: center; font-size: 15px; }
+.steps strong { font-size: 17px; }
+.steps span { color: var(--muted); font-size: 15px; }
+
+.math { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 10px 28px; font-variant-numeric: tabular-nums; color: var(--muted); font-size: 15px; }
+.math b { color: var(--ink); }
+
+.final { text-align: left; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; background: var(--ink); color: var(--bg); border-radius: 28px; padding: 40px; margin-block: 56px; }
+.final h2 { margin: 0 0 6px; color: var(--bg); }
+.final p { margin: 0; opacity: 0.8; max-width: 32em; }
+
+footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; padding-block: 8px 40px; color: var(--muted); font-size: 15px; }
+footer a { font-weight: 700; color: var(--accent); }
+
+@media (max-width: 860px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 36px; padding-block: 16px 48px; }
+  .benefits { grid-template-columns: minmax(0, 1fr); }
+  .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .final { padding: 28px; }
+}
+@media (max-width: 420px) {
+  .steps { grid-template-columns: minmax(0, 1fr); }
+  .task { padding: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn { transition: none; }
+  .promo { transform: none; }
+}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="logo" href="/"><span class="logo-mark">T</span>Taskly</a>
+    <a class="top-link" id="feedback-top" href="/support">Оставить отзыв</a>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <span class="eyebrow">Для малого и среднего бизнеса</span>
+        <h1>Задача висит месяц? Найдите исполнителя за 3 минуты и платите только за результат.</h1>
+        <p class="lead">Taskly соединяет бизнес с начинающими специалистами: дизайн, тексты, таблицы, боты, сайты. Вы описываете задачу — исполнители откликаются с ценой и сроком.</p>
+        <div class="cta-row">
+          <a class="btn" href="/signup?role=client">
+            Try it — разместить задачу
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
+          <span class="note">Для бизнеса бесплатно</span>
+        </div>
+      </div>
+
+      <div class="side" aria-label="Пример проекта на Taskly">
+        <div class="promo">
+          <b>Акция · до 30 ноября</b>
+          <p>Первым 100 компаниям — помощник по ТЗ и подбор исполнителя бесплатно</p>
+        </div>
+        <div class="task">
+          <span class="pill">Идёт поиск исполнителя</span>
+          <h3>Лендинг для барбершопа</h3>
+          <div class="facts">
+            <div><span>Бюджет</span><strong>100 000 ₸</strong></div>
+            <div><span>Срок</span><strong>12 дней</strong></div>
+            <div><span>Правок по ТЗ</span><strong>2</strong></div>
+          </div>
+          <div class="bids">
+            <div class="faces"><i style="background:#f4c9b8">АС</i><i style="background:#c9dcf2">ДЕ</i><i style="background:#d6e8c9">ТА</i></div>
+            <span>4 отклика за 2 часа</span>
+          </div>
+          <p class="safe">Оплата резервируется и уходит исполнителю только после приёмки</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="benefits-h">
+      <h2 id="benefits-h">Что вы получаете</h2>
+      <div class="benefits">
+        <article class="benefit">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M7 3h7l5 5v13H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 3v5h5M10 13h6M10 17h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <h3>Понятное ТЗ без мучений</h3>
+          <p>Ответьте на 6 простых вопросов — мастер соберёт техническое задание: что сделать, результат, срок, бюджет и сколько правок.</p>
+        </article>
+        <article class="benefit">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="9" cy="8" r="3.5" stroke="currentColor" stroke-width="2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .8 3 3 3 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <h3>Исполнители по вашему бюджету</h3>
+          <p>Студенты и начинающие специалисты откликаются с ценой и сроком. Вы сравниваете портфолио, отзывы и выбираете.</p>
+        </article>
+        <article class="benefit">
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.2-8 9-4.6-.8-8-4.5-8-9V6z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8.5 12l2.5 2.5 4.5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+          <h3>Без риска потерять деньги</h3>
+          <p>Оплата резервируется до начала работы и переходит исполнителю только после того, как вы приняли результат.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="block" aria-labelledby="steps-h">
+      <h2 id="steps-h">Как проходит сделка</h2>
+      <ol class="steps">
+        <li><strong>Опишите задачу</strong><span>Мастер из 6 вопросов собирает ТЗ</span></li>
+        <li><strong>Выберите исполнителя</strong><span>Отклики с ценой, сроком и портфолио</span></li>
+        <li><strong>Зарезервируйте оплату</strong><span>Деньги ждут приёмки работы</span></li>
+        <li><strong>Примите результат</strong><span>Исполнитель получает оплату, вы оставляете отзыв</span></li>
+      </ol>
+      <div class="math">
+        <span>Пример: бюджет <b>100 000 ₸</b></span>
+        <span>вы платите <b>100 000 ₸</b> — без доплат</span>
+        <span>исполнитель получает <b>95 000 ₸</b></span>
+        <span>комиссия Taskly <b>5%</b> — только с завершённых проектов</span>
+      </div>
+    </section>
+
+    <section class="final" aria-labelledby="final-h">
+      <div>
+        <h2 id="final-h">Первая задача — за 3 минуты</h2>
+        <p>Зарегистрируйтесь, опишите задачу и получите первые отклики уже сегодня.</p>
+      </div>
+      <a class="btn" href="/signup?role=client">Try it</a>
+    </section>
+  </main>
+
+  <footer>
+    <span>Taskly · биржа задач для бизнеса и начинающих специалистов</span>
+    <span>Есть идея или замечание? <a id="feedback-bottom" href="/support">Оставьте отзыв</a></span>
+  </footer>
+</div>
+</body>
+</html>

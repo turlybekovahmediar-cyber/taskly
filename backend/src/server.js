@@ -59,6 +59,7 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Нет такого
 if (existsSync(DIST)) {
   app.use('/assets', express.static(DIST + '/assets', { immutable: true, maxAge: '1y' }));
   app.use(express.static(DIST, { index: false, maxAge: '1h' }));
+  app.get('/landing', (req, res) => res.sendFile(DIST + '/landing.html', { headers: { 'Cache-Control': 'no-cache' } }));
   app.get('*', (req, res) => res.sendFile(DIST + '/index.html', { headers: { 'Cache-Control': 'no-cache' } }));
 } else {
   app.get('/', (req, res) => res.type('text').send('API работает. Фронтенд не собран: npm --prefix frontend run build (или запустите npm run dev во frontend/).'));
